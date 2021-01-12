@@ -1,7 +1,8 @@
 fixtures:
   forge_modules:
+    augeas: "puppetlabs/augeas_core"
+    epel: "puppet/epel"
     facter: "ghoneycutt/facter"
     firewalld: "puppet/firewalld"
     stdlib: "puppetlabs/stdlib"
-    epel: "puppet/epel"
     yumrepo: "puppetlabs/yumrepo_core"
