@@ -7,16 +7,24 @@
   "source": "https://github.com/EncoreTechnologies/puppet-ipa",
   "dependencies": [
     {
-      "name": "puppetlabs-stdlib",
+      "name": "puppetlabs/stdlib",
       "version_requirement": ">= 4.13.0"
     },
     {
-      "name": "crayfishx/firewalld",
+      "name": "puppet/firewalld",
       "version_requirement": ">=3.0.0"
     },
     {
-      "name": "ipcrm/echo",
-      "version_requirement": ">= 0.1.0"
+      "name": "ghoneycutt/facter",
+      "version_requirement": ">=3.0.0"
+    },
+    {
+      "name": "puppet/epel",
+      "version_requirement": ">=3.0.0"
+    },
+    {
+      "name": "puppetlabs/yumrepo_core",
+      "version_requirement": ">=1.0.0"
     }
   ],
   "operatingsystem_support": [

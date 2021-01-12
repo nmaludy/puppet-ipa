@@ -59,3 +59,4 @@ def ensure_module_defined(module_name)
 end
 
 # 'spec_overrides' from sync.yml will appear below this line
+RSpec::Support::ObjectFormatter.default_instance.max_formatted_output_length = 99999999

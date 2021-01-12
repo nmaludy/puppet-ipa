@@ -1,0 +1,7 @@
+fixtures:
+  forge_modules:
+    facter: "ghoneycutt/facter"
+    firewalld: "puppet/firewalld"
+    stdlib: "puppetlabs/stdlib"
+    epel: "puppet/epel"
+    yumrepo: "puppetlabs/yumrepo_core"

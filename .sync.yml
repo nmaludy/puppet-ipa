@@ -56,3 +56,6 @@ Gemfile:
 spec/spec_helper.rb:
   mock_with: ':mocha'
   strict_level: ':warning'
+  spec_overrides:
+    # print out really long exception messages (this prevents them from being truncated)
+    - 'RSpec::Support::ObjectFormatter.default_instance.max_formatted_output_length = 99999999'
