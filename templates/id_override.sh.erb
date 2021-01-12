@@ -1,0 +1,23 @@
+#!/bin/bash
+
+userID=$1
+ad_domain=<%= @ad_domain %>
+homeDir="/home/ipa/${ad_domain}/${userID}"
+sshKey="$(cat "${homeDir}/.ssh/id_rsa.pub")"
+
+if [[ -z $userID ]]; then
+  echo "Must supply user ID to process (user.name)"
+  exit 1
+fi
+
+klist -s
+if [[ $? -gt 0 ]]; then
+  echo "Enter the IPA admin password (NOTE: password is masked)"
+  kinit admin
+fi
+
+ipa idoverrideuser-add "Default Trust View" "${userID}@${ad_domain}" \
+  --shell='/bin/bash' \
+  --homedir="$homeDir" \
+  --sshpubkey="$sshKey"
+
