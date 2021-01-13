@@ -30,4 +30,3 @@ service_mgt "restart" "autofs"
 
 service_mgt "status" "sssd"
 service_mgt "status" "autofs"
-

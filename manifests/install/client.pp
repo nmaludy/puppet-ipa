@@ -11,8 +11,8 @@ class ipa::install::client (
   Boolean            $make_homedir          = $ipa::mkhomedir,
   Sensitive[String]  $principal_pass        = $ipa::final_domain_join_password,
   String             $principal_user        = $ipa::final_domain_join_principal,
+  String             $sssd_package_name     = $ipa::params::sssd_package_name,
 ) {
-
   package{ 'ipa-client':
     ensure => $client_ensure,
     name   => $client_package_name,
@@ -48,8 +48,6 @@ class ipa::install::client (
     --unattended
     | EOC
 
-  # Some platforms require "manual" setup as they don't have the freeipa-client
-  # package.
   if $client_ensure == 'present' {
     exec { "client_install_${::hostname}":
       command     => $client_install_cmd,
@@ -62,8 +60,20 @@ class ipa::install::client (
       provider    => 'shell',
       notify      => Ipa::Helpers::Flushcache["server_${::fqdn}"],
     }
-  } else {
-    include ipa::install::client::manual
+
+    # This will customize the sssd.conf file for EMS specifics.
+    # NOTE: Needed to place outside of master loop to allow for IPA install to
+    #       create original version and then update it on the master server.
+    file { '/etc/sssd/sssd.conf':
+      ensure  => file,
+      content => template('ipa/sssd.conf.erb'),
+      mode    => '0600',
+      require => [
+        Package[$sssd_package_name],
+        Exec["client_install_${::hostname}"],
+      ],
+      notify  => Ipa::Helpers::Flushcache["server_${::fqdn}"],
+    }
   }
 
   if $automount_home_dir != undef {

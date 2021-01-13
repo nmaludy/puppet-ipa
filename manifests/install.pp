@@ -65,16 +65,6 @@ class ipa::install (
   # Install client if setting up replica server
   if $ipa_role == 'client' or $ipa_role == 'replica' {
     contain ipa::install::client
-
-    # This will customize the sssd.conf file for EMS specifics.
-    # NOTE: Needed to place outside of master loop to allow for IPA install to
-    #       create original version and then update it on the master server.
-    file { '/etc/sssd/sssd.conf':
-      content => template('ipa/sssd.conf.erb'),
-      mode    => '0600',
-      require => Package[$sssd_package_name],
-      notify  => Ipa::Helpers::Flushcache["server_${::fqdn}"],
-    }
   }
 
   if $ipa_role == 'master' or $ipa_role == 'replica' {
