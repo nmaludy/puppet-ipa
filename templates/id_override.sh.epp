@@ -1,7 +1,10 @@
+<%-|
+  String $ad_domain
+|-%>
 #!/bin/bash
 
 userID=$1
-ad_domain=<%= @ad_domain %>
+ad_domain=<%= $ad_domain %>
 homeDir="/home/ipa/${ad_domain}/${userID}"
 sshKey="$(cat "${homeDir}/.ssh/id_rsa.pub")"
 

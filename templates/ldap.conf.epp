@@ -1,3 +1,7 @@
+<%-|
+  String $ipa_master_fqdn,
+  String $ldap_base,
+|-%>
 # FILE MANAGED BY PUPPET. ALL MANUAL CHANGES WILL BE OVERWRITTEN.
 
 # We do not want to break your existing configuration, hence:
@@ -27,5 +31,5 @@
 #TLS_CACERT /etc/ipa/ca.crt # modified by IPA
 TLS_CACERT	/etc/ssl/certs/ca-certificates.crt
 
-URI ldaps://<%= scope['ipa::ipa_master_fqdn'] %>
-BASE <%= @ldap_base %>
+URI ldaps://<%= $ipa_master_fqdn %>
+BASE <%= $ldap_base %>

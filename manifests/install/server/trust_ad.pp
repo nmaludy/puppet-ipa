@@ -82,7 +82,13 @@ class ipa::install::server::trust_ad (
     mode    => '0750',
     owner   => 'root',
     group   => 'root',
-    content => template('ipa/config_ipa_ldap.sh.erb'),
+    content => epp('ipa/config_ipa_ldap.sh.epp', {
+      ad_admin   => $ad_admin,
+      ad_domain  => $ad_domain,
+      ad_groups  => $ad_groups,
+      ad_realm   => $ad_realm,
+      admin_pass => $admin_pass,
+    }),
   }
 
   file { '/root/02_id_override.sh':
@@ -90,6 +96,8 @@ class ipa::install::server::trust_ad (
     mode    => '0750',
     owner   => 'root',
     group   => 'root',
-    content => template('ipa/id_override.sh.erb'),
+    content => epp('ipa/id_override.sh.epp', {
+      ad_domain => $ad_domain,
+    }),
   }
 }

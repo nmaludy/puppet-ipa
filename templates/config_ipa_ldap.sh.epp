@@ -1,12 +1,19 @@
+<%-|
+  String $ad_admin,
+  String $ad_domain,
+  Array[String] $ad_groups,
+  String $ad_realm,
+  String $admin_pass,
+|-%>
 #!/bin/bash
 
 # DESCRIPTION:  This script will enable LDAP integration with IPA if parameters
 #               are configured to the environment.
 
 # AD Domain for users
-ad_domain=<%= @ad_domain %>
+ad_domain=<%= $ad_domain %>
 # An array of LDAP groups to configure within IPA
-ad_groups=(<%= @ad_groups.join(' ') %>)
+ad_groups=(<%= $ad_groups.join(' ') %>)
 log='ipa_ldap_config.log'
 
 # Start of main
@@ -34,8 +41,8 @@ fi
 if [[ -f /etc/samba/samba.keystore ]]; then
   sudo yum -y install ipa-server-trust-ad samba samba-client
 
-  echo '<%= @admin_pass %>' | kinit admin
-  ipa-adtrust-install <%= @ad_realm %> --admin=<%= @ad_admin %> -U 2>&1| tee -a "$log"
+  echo '<%= $admin_pass %>' | kinit admin
+  ipa-adtrust-install <%= $ad_realm %> --admin=<%= $ad_admin %> -U 2>&1| tee -a "$log"
 fi
 
 # Create IPA groups
