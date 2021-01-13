@@ -8,7 +8,7 @@
 #                to false is useful when a handful of hosts have unsupported
 #                operating systems and you'd rather exclude them from FreeIPA
 #                instead of including the others individually. Use this with
-#                a separate Hiera level (e.g. $::lsbdistcodename) for maximum
+#                a separate Hiera level (e.g. $facts['lsbdistcodename']) for maximum
 #                convenience.
 # `domain`
 #      (string) The name of the IPA domain to create or join.
@@ -218,7 +218,7 @@ class ipa (
   Boolean              $install_trust_ad         = true,
   String               $ipa_master_fqdn          = '',
   String               $ipa_role                 = 'client',
-  String               $ipa_server_fqdn          = $::fqdn,
+  String               $ipa_server_fqdn          = $facts['fqdn'],
   Boolean              $manage_host_entry        = true,
   Boolean              $manage                   = true,
   Boolean              $mkhomedir                = false,

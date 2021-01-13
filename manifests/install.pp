@@ -101,6 +101,6 @@ class ipa::install (
   }
 
   # Define helper
-  ipa::helpers::flushcache { "server_${::fqdn}": }
+  ipa::helpers::flushcache { "server_${$facts['fqdn']}": }
 
 }

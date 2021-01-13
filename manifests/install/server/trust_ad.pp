@@ -50,7 +50,7 @@ class ipa::install::server::trust_ad (
       command   => $adtrust_install_cmd,
       path      => ['bin', '/sbin', '/usr/sbin'],
       logoutput => 'on_failure',
-      notify    => Ipa::Helpers::Flushcache["server_${::fqdn}"],
+      notify    => Ipa::Helpers::Flushcache["server_${$facts['fqdn']}"],
     }
     ~> exec { 'trust_ad_trust_add':
       command     => $trust_add_cmd,

@@ -1,6 +1,8 @@
 require 'spec_helper'
 
 describe 'ipa::install::sssd' do
+  mock_firewalld
+
   on_supported_os.each do |os, os_facts|
     context "on #{os}" do
       let(:facts) { os_facts.merge(fqdn: 'hostname.domain.tld') }
@@ -42,6 +44,9 @@ service_mgt "status" "autofs"
 EOS
       end
 
+      it do
+        is_expected.to compile
+      end
       it do
         is_expected.to contain_package('sssd-common')
           .with('ensure' => 'present')

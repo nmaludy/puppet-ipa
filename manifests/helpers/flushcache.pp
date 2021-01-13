@@ -3,8 +3,8 @@ define ipa::helpers::flushcache {
   include ipa::params
 
   exec { 'stop_sssd':
-    command     => inline_epp($::ipa::params::service_stop_epp,
-                              {'service' => $::ipa::params::sssd_service}),
+    command     => inline_epp($ipa::params::service_stop_epp,
+                              {'service' => $ipa::params::sssd_service}),
     path        => ['/sbin', '/bin', '/usr/bin'],
     refreshonly => true,
   }
@@ -20,8 +20,8 @@ define ipa::helpers::flushcache {
 
   ~> if $ipa::install_autofs {
     exec { 'stop_autofs':
-      command     => inline_epp($::ipa::params::service_stop_epp,
-                                {'service' => $::ipa::params::autofs_service}),
+      command     => inline_epp($ipa::params::service_stop_epp,
+                                {'service' => $ipa::params::autofs_service}),
       path        => ['/sbin', '/bin', '/usr/bin'],
       refreshonly => true,
     }

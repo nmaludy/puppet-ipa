@@ -43,22 +43,22 @@ class ipa::install::server::autofs (
       command     => $kinit_cmd,
       environment => [ "IPA_ADMIN_PASS=${admin_pass}" ],
       path        => ['/bin', '/usr/bin'],
-      notify      => Ipa::Helpers::Flushcache["server_${::fqdn}"],
+      notify      => Ipa::Helpers::Flushcache["server_${$facts['fqdn']}"],
     }
 
-    ~> exec { "automount_map_home_${::fqdn}":
+    ~> exec { "automount_map_home_${$facts['fqdn']}":
       command     => $map_home_cmd,
       path        => ['/bin', '/usr/bin'],
       refreshonly => true,
     }
 
-    ~> exec { "automount_key_home_${::fqdn}":
+    ~> exec { "automount_key_home_${$facts['fqdn']}":
       command     => $key_home_cmd,
       path        => ['/bin', '/usr/bin'],
       refreshonly => true,
     }
 
-    ~> exec { "automount_key_master_${::fqdn}":
+    ~> exec { "automount_key_master_${$facts['fqdn']}":
       command     => $key_master_cmd,
       path        => ['/bin', '/usr/bin'],
       refreshonly => true,
@@ -83,7 +83,7 @@ class ipa::install::server::autofs (
     path   => '/etc/nsswitch.conf',
     line   => 'automount:  files sss',
     match  => '^automount:.*',
-    notify => Ipa::Helpers::Flushcache["server_${::fqdn}"],
+    notify => Ipa::Helpers::Flushcache["server_${$facts['fqdn']}"],
   }
 
   # Set puppet fact for autofs installed

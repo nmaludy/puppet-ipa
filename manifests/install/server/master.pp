@@ -54,7 +54,7 @@ class ipa::install::server::master (
     content => 'Added by IPA Puppet module. Designates primary master. Do not remove.',
   }
 
-  -> exec { "server_install_${::hostname}":
+  -> exec { "server_install_${$facts['fqdn']}":
     command     => $server_install_cmd,
     environment => [ "IPA_ADMIN_PASS=${admin_pass}", "DS_PASSWORD=${ds_password}" ],
     path        => ['bin', '/sbin', '/usr/sbin'],
@@ -71,10 +71,11 @@ class ipa::install::server::master (
 
   # Updated master sssd.conf file after IPA is installed.
   file { '/etc/sssd/sssd.conf':
+    ensure  => file,
     content => template('ipa/sssd.conf.erb'),
     mode    => '0600',
-    require => Exec["server_install_${::hostname}"],
-    notify  => Ipa::Helpers::Flushcache["server_${::fqdn}"],
+    require => Exec["server_install_${$facts['fqdn']}"],
+    notify  => Ipa::Helpers::Flushcache["server_${$facts['fqdn']}"],
   }
 
   exec { 'kinit_master_install':

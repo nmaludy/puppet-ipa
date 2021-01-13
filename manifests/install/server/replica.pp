@@ -55,7 +55,7 @@ class ipa::install::server::replica (
       unless      => '/usr/sbin/ipactl status >/dev/null 2>&1',
       logoutput   => 'on_failure',
       require     => Class['ipa::helpers::firewalld'],
-      notify      => Ipa::Helpers::Flushcache["server_${::fqdn}"],
+      notify      => Ipa::Helpers::Flushcache["server_${$facts['fqdn']}"],
     }
   }
 

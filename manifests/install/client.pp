@@ -49,7 +49,7 @@ class ipa::install::client (
     | EOC
 
   if $client_ensure == 'present' {
-    exec { "client_install_${::hostname}":
+    exec { "client_install_${$facts['fqdn']}":
       command     => $client_install_cmd,
       environment => [ "IPA_JOIN_PASSWORD=${principal_pass.unwrap}" ],
       path        => ['/bin', '/sbin', '/usr/sbin'],
@@ -58,7 +58,7 @@ class ipa::install::client (
       creates     => '/etc/ipa/default.conf',
       logoutput   => 'on_failure',
       provider    => 'shell',
-      notify      => Ipa::Helpers::Flushcache["server_${::fqdn}"],
+      notify      => Ipa::Helpers::Flushcache["server_${$facts['fqdn']}"],
     }
 
     # This will customize the sssd.conf file for EMS specifics.
@@ -70,13 +70,13 @@ class ipa::install::client (
       mode    => '0600',
       require => [
         Package[$sssd_package_name],
-        Exec["client_install_${::hostname}"],
+        Exec["client_install_${$facts['fqdn']}"],
       ],
-      notify  => Ipa::Helpers::Flushcache["server_${::fqdn}"],
+      notify  => Ipa::Helpers::Flushcache["server_${$facts['fqdn']}"],
     }
   }
 
-  if $automount_home_dir != undef {
+  if $automount_home_dir != undef and !$automount_home_dir.empty() {
     exec { 'client_create_automount_home_dir':
       command => "mkdir -p ${automount_home_dir}",
       path    => ['/bin', '/usr/bin'],
@@ -88,7 +88,7 @@ class ipa::install::client (
       path   => '/etc/nsswitch.conf',
       line   => 'automount:  files sss',
       match  => '^automount: ',
-      notify => Ipa::Helpers::Flushcache["server_${::fqdn}"],
+      notify => Ipa::Helpers::Flushcache["server_${$facts['fqdn']}"],
     }
 
     # Required for cross-domain lookups (example, AD joined hosts) lookup.
