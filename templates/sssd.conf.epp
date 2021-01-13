@@ -1,0 +1,95 @@
+<%-|
+  String $domain,
+  String $fqdn,
+  String $ipa_role,
+  String $sssd_debug_level,
+  Boolean $ignore_group_members,
+  Boolean $install_autofs,
+  Array[String] $sssd_services,
+  String $automount_location = '',
+  String $ipa_master_fqdn = '',
+  String $ad_domain = '',
+  String $ad_site = '',
+  String $ad_ldap_search_base = '',
+  Optional[String] $override_homedir = undef,
+|-%>
+[domain/<%= $domain %>]
+debug_level = <%= $sssd_debug_level %>
+cache_credentials = True
+krb5_store_password_if_offline = True
+ipa_domain = <%= $domain %>
+id_provider = ipa
+auth_provider = ipa
+access_provider = ipa
+ipa_hostname = <%= $fqdn %>
+chpass_provider = ipa
+<% if ($ipa_role == 'master') or ($ipa_role == 'replica') { -%>
+# on masters/replicas, set ipa_server to itself to avoid this bug: https://access.redhat.com/solutions/3178971
+ipa_server = <%= $fqdn %>
+ipa_server_mode = True
+<% } elsif $ipa_role == 'client' { -%>
+ipa_server = _srv_, <%= $ipa_master_fqdn %>
+<% } -%>
+ldap_tls_cacert = /etc/ipa/ca.crt
+<% if $install_autofs == true { -%>
+autofs_provider = ipa
+ipa_automount_location = <%= $automount_location %>
+<% } -%>
+<% if $ignore_group_members == true { -%>
+ignore_group_members = True
+subdomain_inherit = ldap_user_principal, ignore_group_members
+<% } else { -%>
+subdomain_inherit = ldap_user_principal
+<% } -%>
+ldap_user_principal = nosuchattr
+
+<% if $ad_domain != '' { -%>
+[domain/<%= $domain -%>/<%= $ad_domain %>]
+  <%- if $ad_site != '' { -%>
+ad_site = <%= $ad_site %>
+  <%- } -%>
+  <%- if $ad_ldap_search_base != '' { -%>
+ldap_search_base = <%= $ad_ldap_search_base %>
+  <%- } -%>
+
+<% } -%>
+[sssd]
+debug_level = <%= $sssd_debug_level %>
+services = <%= $sssd_services.join(',') %>
+domains = <%= $domain %>
+
+[nss]
+debug_level = <%= $sssd_debug_level %>
+homedir_substring = /home
+<% if $override_homedir != undef { -%>
+override_homedir = <%= $override_homedir %>
+<% } -%>
+default_shell = /bin/bash
+<% if ($ipa_role == 'master') or ($ipa_role == 'replica') { -%>
+memcache_timeout = 300
+<% }-%>
+
+[pam]
+debug_level = <%= $sssd_debug_level %>
+
+[sudo]
+debug_level = <%= $sssd_debug_level %>
+
+[autofs]
+debug_level = <%= $sssd_debug_level %>
+
+[ssh]
+debug_level = <%= $sssd_debug_level %>
+
+[pac]
+debug_level = <%= $sssd_debug_level %>
+
+[ifp]
+debug_level = <%= $sssd_debug_level %>
+<% if ($ipa_role == 'master') or ($ipa_role == 'replica') { -%>
+
+[secrets]
+debug_level = <%= $sssd_debug_level %>
+
+[session_recording]
+<% } -%>

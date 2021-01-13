@@ -1,18 +1,29 @@
 #
 class ipa::install::client (
-  String             $automount_home_dir    = $ipa::automount_home_dir,
-  Boolean            $client_configure_ntp  = $ipa::configure_ntp,
-  String             $client_ensure         = $ipa::params::ipa_client_package_ensure,
-  Boolean            $client_install_ldap   = $ipa::client_install_ldaputils,
-  String             $client_package_name   = $ipa::params::ipa_client_package_name,
-  Boolean            $client_trust_dns      = $ipa::trust_dns,
-  String             $domain_name           = $ipa::domain,
-  String             $ldap_package_name     = $ipa::params::ldaputils_package_name,
-  Boolean            $make_homedir          = $ipa::mkhomedir,
-  Sensitive[String]  $principal_pass        = $ipa::final_domain_join_password,
-  String             $principal_user        = $ipa::final_domain_join_principal,
-  String             $sssd_package_name     = $ipa::params::sssd_package_name,
-) {
+  String            $ad_domain            = $ipa::ad_domain,
+  String            $ad_ldap_search_base  = $ipa::ad_ldap_search_base,
+  String            $ad_site              = $ipa::ad_site,
+  String            $automount_location   = $ipa::automount_location,
+  String            $automount_home_dir   = $ipa::automount_home_dir,
+  Boolean           $client_configure_ntp = $ipa::configure_ntp,
+  String            $client_ensure        = $ipa::params::ipa_client_package_ensure,
+  Boolean           $client_install_ldap  = $ipa::client_install_ldaputils,
+  String            $client_package_name  = $ipa::params::ipa_client_package_name,
+  Boolean           $client_trust_dns     = $ipa::trust_dns,
+  String            $domain_name          = $ipa::domain,
+  Boolean           $ignore_group_members = $ipa::ignore_group_members,
+  Boolean           $install_autofs       = $ipa::install_autofs,
+  String            $ipa_role             = $ipa::ipa_role,
+  String            $ipa_master_fqdn      = $ipa::ipa_master_fqdn,
+  String            $ldap_package_name    = $ipa::params::ldaputils_package_name,
+  Boolean           $make_homedir         = $ipa::mkhomedir,
+  Optional[String]  $override_homedir     = $ipa::override_homedir,
+  Sensitive[String] $principal_pass       = $ipa::final_domain_join_password,
+  String            $principal_user       = $ipa::final_domain_join_principal,
+  String            $sssd_debug_level     = $ipa::sssd_debug_level,
+  String            $sssd_package_name    = $ipa::params::sssd_package_name,
+  Array[String]     $sssd_services        = $ipa::sssd_services,
+) inherits ipa {
   package{ 'ipa-client':
     ensure => $client_ensure,
     name   => $client_package_name,
@@ -28,7 +39,7 @@ class ipa::install::client (
     $client_dns_opts = '--ssh-trust-dns'
   } else {
     # Fix is not using DNS for host resolution
-    $client_dns_opts = "--server=${ipa::ipa_master_fqdn}"
+    $client_dns_opts = "--server=${ipa_master_fqdn}"
   }
 
   if $client_configure_ntp {
@@ -66,7 +77,21 @@ class ipa::install::client (
     #       create original version and then update it on the master server.
     file { '/etc/sssd/sssd.conf':
       ensure  => file,
-      content => template('ipa/sssd.conf.erb'),
+      content => epp('ipa/sssd.conf.epp', {
+        ad_domain            => $ad_domain,
+        ad_ldap_search_base  => $ad_ldap_search_base,
+        ad_site              => $ad_site,
+        automount_location   => $automount_location,
+        domain               => $domain_name,
+        fqdn                 => $facts['fqdn'],
+        ignore_group_members => $ignore_group_members,
+        install_autofs       => $install_autofs,
+        ipa_master_fqdn      => $ipa_master_fqdn,
+        ipa_role             => $ipa_role,
+        override_homedir     => $override_homedir,
+        sssd_debug_level     => $sssd_debug_level,
+        sssd_services        => $sssd_services,
+      }),
       mode    => '0600',
       require => [
         Package[$sssd_package_name],

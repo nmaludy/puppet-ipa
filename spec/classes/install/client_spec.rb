@@ -38,7 +38,6 @@ ipa_automount_location = default
 subdomain_inherit = ldap_user_principal
 ldap_user_principal = nosuchattr
 
-
 [sssd]
 debug_level = 3
 services = nss,sudo,pam,ssh,autofs
@@ -66,7 +65,6 @@ debug_level = 3
 
 [ifp]
 debug_level = 3
-
 EOS
         end
 
@@ -117,7 +115,6 @@ autofs_provider = ipa
 ipa_automount_location = default
 subdomain_inherit = ldap_user_principal
 ldap_user_principal = nosuchattr
-
 
 [sssd]
 debug_level = 3

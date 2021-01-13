@@ -1,7 +1,12 @@
 #
 class ipa::install::server::master (
+  String             $ad_domain            = $ipa::ad_domain,
+  String             $ad_ldap_search_base  = $ipa::ad_ldap_search_base,
+  String             $ad_site              = $ipa::ad_site,
   String   $admin_pass           = $ipa::admin_password,
   String   $admin_user           = $ipa::admin_user,
+  String             $automount_location   = $ipa::automount_location,
+
   String   $cmd_opts_dns         = $ipa::install::server::server_install_cmd_opts_setup_dns,
   String   $cmd_opts_dnssec      = $ipa::install::server::server_install_cmd_opts_dnssec_validation,
   String   $cmd_opts_forwarders  = $ipa::install::server::server_install_cmd_opts_forwarders,
@@ -11,9 +16,15 @@ class ipa::install::server::master (
   String   $cmd_opts_ui          = $ipa::install::server::server_install_cmd_opts_no_ui_redirect,
   String   $cmd_opts_zones       = $ipa::install::server::server_install_cmd_opts_zone_overlap,
   String   $ds_password          = $ipa::ds_password,
+  Boolean           $ignore_group_members = $ipa::ignore_group_members,
+  Boolean           $install_autofs       = $ipa::install_autofs,
   String   $ipa_domain           = $ipa::domain,
   String   $ipa_realm            = $ipa::final_realm,
   String   $ipa_role             = $ipa::ipa_role,
+  String            $ipa_master_fqdn      = $ipa::ipa_master_fqdn,
+  Optional[String]  $override_homedir     = $ipa::override_homedir,
+  String            $sssd_debug_level     = $ipa::sssd_debug_level,
+  Array[String]     $sssd_services        = $ipa::sssd_services,
 ) {
 
   # Build server-install command
@@ -72,7 +83,21 @@ class ipa::install::server::master (
   # Updated master sssd.conf file after IPA is installed.
   file { '/etc/sssd/sssd.conf':
     ensure  => file,
-    content => template('ipa/sssd.conf.erb'),
+    content => epp('ipa/sssd.conf.epp', {
+      ad_domain            => $ad_domain,
+      ad_ldap_search_base  => $ad_ldap_search_base,
+      ad_site              => $ad_site,
+      automount_location   => $automount_location,
+      domain               => $ipa_domain,
+      fqdn                 => $facts['fqdn'],
+      ignore_group_members => $ignore_group_members,
+      install_autofs       => $install_autofs,
+      ipa_master_fqdn      => $ipa_master_fqdn,
+      ipa_role             => $ipa_role,
+      override_homedir     => $override_homedir,
+      sssd_debug_level     => $sssd_debug_level,
+      sssd_services        => $sssd_services,
+    }),
     mode    => '0600',
     require => Exec["server_install_${$facts['fqdn']}"],
     notify  => Ipa::Helpers::Flushcache["server_${$facts['fqdn']}"],
