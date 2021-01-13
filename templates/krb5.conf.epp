@@ -1,0 +1,34 @@
+<%-|
+  String $domain,
+  String $final_realm,
+  String $ipa_master_fqdn,
+|-%>
+# FILE MANAGED BY PUPPET. ALL MANUAL CHANGES WILL BE OVERWRITTEN.
+
+includedir /var/lib/sss/pubconf/krb5.include.d/
+
+[libdefaults]
+  default_realm = <%= $final_realm %>
+  dns_lookup_realm = false
+  dns_lookup_kdc = false
+  rdns = false
+  ticket_lifetime = 24h
+  forwardable = true
+  udp_preference_limit = 0
+  default_ccache_name = KEYRING:persistent:%{uid}
+
+
+[realms]
+  <%= $final_realm %> = {
+    kdc = <%= $ipa_master_fqdn %>:88
+    master_kdc = <%= $ipa_master_fqdn %>:88
+    admin_server = <%= $ipa_master_fqdn %>:749
+    default_domain = <%= $domain %>
+    pkinit_anchors = FILE:/etc/ipa/ca.crt
+
+  }
+
+[domain_realm]
+  .<%= $domain %> = <%= $final_realm %>
+  <%= $domain %> = <%= $final_realm %>
+

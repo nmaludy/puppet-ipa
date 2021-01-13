@@ -1,0 +1,55 @@
+{
+  "name": "encore-ipa",
+  "version": "0.1.0",
+  "author": "Encore Technologies",
+  "summary": "Manages IPA servers and clients.",
+  "license": "Apache-2.0",
+  "source": "https://github.com/EncoreTechnologies/puppet-ipa",
+  "dependencies": [
+    {
+      "name": "puppetlabs/stdlib",
+      "version_requirement": ">= 4.13.0 < 7.0.0"
+    },
+    {
+      "name": "puppet/firewalld",
+      "version_requirement": ">= 3.0.0 < 5.0.0"
+    },
+    {
+      "name": "ghoneycutt/facter",
+      "version_requirement": ">= 3.0.0 < 4.0.0"
+    },
+    {
+      "name": "puppet/epel",
+      "version_requirement": ">= 3.0.0 < 4.0.0"
+    },
+    {
+      "name": "puppetlabs/yumrepo_core",
+      "version_requirement": ">= 1.0.0 < 2.0.0"
+    }
+  ],
+  "operatingsystem_support": [
+    {
+      "operatingsystem": "CentOS",
+      "operatingsystemrelease": [
+        "7",
+        "8"
+      ]
+    },
+    {
+      "operatingsystem": "RedHat",
+      "operatingsystemrelease": [
+        "7",
+        "8"
+      ]
+    }
+  ],
+  "requirements": [
+    {
+      "name": "puppet",
+      "version_requirement": ">= 4.7.0 <= 6.0.0"
+    }
+  ],
+  "pdk-version": "1.18.1",
+  "template-url": "pdk-default#1.18.1",
+  "template-ref": "tags/1.18.1-0-g3d2e75c"
+}
