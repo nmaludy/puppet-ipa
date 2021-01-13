@@ -59,46 +59,44 @@ class ipa::install::client (
     --unattended
     | EOC
 
-  if $client_ensure == 'present' {
-    exec { "client_install_${$facts['fqdn']}":
-      command     => $client_install_cmd,
-      environment => [ "IPA_JOIN_PASSWORD=${principal_pass.unwrap}" ],
-      path        => ['/bin', '/sbin', '/usr/sbin'],
-      timeout     => 0,
-      unless      => "cat /etc/ipa/default.conf | grep -i \"${domain_name}\"",
-      creates     => '/etc/ipa/default.conf',
-      logoutput   => 'on_failure',
-      provider    => 'shell',
-      notify      => Ipa::Helpers::Flushcache["server_${$facts['fqdn']}"],
-    }
+  exec { "client_install_${$facts['fqdn']}":
+    command     => $client_install_cmd,
+    environment => [ "IPA_JOIN_PASSWORD=${principal_pass.unwrap}" ],
+    path        => ['/bin', '/sbin', '/usr/sbin'],
+    timeout     => 0,
+    unless      => "cat /etc/ipa/default.conf | grep -i \"${domain_name}\"",
+    creates     => '/etc/ipa/default.conf',
+    logoutput   => 'on_failure',
+    provider    => 'shell',
+    notify      => Ipa::Helpers::Flushcache["server_${$facts['fqdn']}"],
+  }
 
-    # This will customize the sssd.conf file for EMS specifics.
-    # NOTE: Needed to place outside of master loop to allow for IPA install to
-    #       create original version and then update it on the master server.
-    file { '/etc/sssd/sssd.conf':
-      ensure  => file,
-      content => epp('ipa/sssd.conf.epp', {
-        ad_domain            => $ad_domain,
-        ad_ldap_search_base  => $ad_ldap_search_base,
-        ad_site              => $ad_site,
-        automount_location   => $automount_location,
-        domain               => $domain_name,
-        fqdn                 => $facts['fqdn'],
-        ignore_group_members => $ignore_group_members,
-        install_autofs       => $install_autofs,
-        ipa_master_fqdn      => $ipa_master_fqdn,
-        ipa_role             => $ipa_role,
-        override_homedir     => $override_homedir,
-        sssd_debug_level     => $sssd_debug_level,
-        sssd_services        => $sssd_services,
-      }),
-      mode    => '0600',
-      require => [
-        Package[$sssd_package_name],
-        Exec["client_install_${$facts['fqdn']}"],
-      ],
-      notify  => Ipa::Helpers::Flushcache["server_${$facts['fqdn']}"],
-    }
+  # This will customize the sssd.conf file for EMS specifics.
+  # NOTE: Needed to place outside of master loop to allow for IPA install to
+  #       create original version and then update it on the master server.
+  file { '/etc/sssd/sssd.conf':
+    ensure  => file,
+    content => epp('ipa/sssd.conf.epp', {
+      ad_domain            => $ad_domain,
+      ad_ldap_search_base  => $ad_ldap_search_base,
+      ad_site              => $ad_site,
+      automount_location   => $automount_location,
+      domain               => $domain_name,
+      fqdn                 => $facts['fqdn'],
+      ignore_group_members => $ignore_group_members,
+      install_autofs       => $install_autofs,
+      ipa_master_fqdn      => $ipa_master_fqdn,
+      ipa_role             => $ipa_role,
+      override_homedir     => $override_homedir,
+      sssd_debug_level     => $sssd_debug_level,
+      sssd_services        => $sssd_services,
+    }),
+    mode    => '0600',
+    require => [
+      Package[$sssd_package_name],
+      Exec["client_install_${$facts['fqdn']}"],
+    ],
+    notify  => Ipa::Helpers::Flushcache["server_${$facts['fqdn']}"],
   }
 
   if $automount_home_dir != undef and !$automount_home_dir.empty() {
@@ -115,19 +113,28 @@ class ipa::install::client (
       match  => '^automount: ',
       notify => Ipa::Helpers::Flushcache["server_${$facts['fqdn']}"],
     }
-
-    # Required for cross-domain lookups (example, AD joined hosts) lookup.
-    ~> file_line { 'krb5.conf_dns_realm':
-      path  => '/etc/krb5.conf',
-      line  => '  dns_lookup_realm = true',
-      match => '^  dns_lookup_realm =',
-    }
-
-    ~> file_line { 'krb5.conf_dns_kdc':
-      path  => '/etc/krb5.conf',
-      line  => '  dns_lookup_kdc = true',
-      match => '^  dns_lookup_kdc =',
-    }
   }
 
+  # Update nsswitch with sudoers config
+  file_line { '/etc/nsswitch.conf':
+    path   => '/etc/nsswitch.conf',
+    line   => 'sudoers:  files sss',
+    match  => '^sudoers: ',
+    notify => Ipa::Helpers::Flushcache["server_${$facts['fqdn']}"],
+  }
+
+  # Required for cross-domain lookups (example, AD joined hosts) lookup.
+  file_line { 'krb5.conf_dns_realm':
+    path    => '/etc/krb5.conf',
+    line    => '  dns_lookup_realm = true',
+    match   => '^  dns_lookup_realm =',
+    require => Exec["client_install_${$facts['fqdn']}"],
+  }
+
+  file_line { 'krb5.conf_dns_kdc':
+    path    => '/etc/krb5.conf',
+    line    => '  dns_lookup_kdc = true',
+    match   => '^  dns_lookup_kdc =',
+    require => Exec["client_install_${$facts['fqdn']}"],
+  }
 }
