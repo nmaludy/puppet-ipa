@@ -19,10 +19,20 @@ class ipa::install (
   String     $sssd_package_name   = $ipa::params::sssd_package_name,
   String     $sssd_tools_package  = $ipa::params::sssdtools_package_name,
 ) {
-
   # Do we want to do this or rely on Satellite repository?
   if $install_epel and $facts['os']['family'] == 'RedHat' {
     contain epel
+
+    # if CentOS 8+, need to enabled the "idm" DNF module version "DL1" that includes
+    # both the client and server installs
+    $os_name = $facts['os']['name']
+    $os_maj = $facts['os']['release']['major']
+    if ($os_name == 'CentOS' and versioncmp($os_maj, '8') >= 0 and !defined(Package['idm'])) {
+      package { 'idm':
+        ensure   => 'DL1',
+        provider => 'dnfmodule',
+      }
+    }
   }
 
   # Configure firewall rules if enabled.

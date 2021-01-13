@@ -52,4 +52,11 @@ class ipa::params {
   $sssd_package_name        = 'sssd-common'
   $sssdtools_package_name   = 'sssd-tools'
 
+  # In order to avoid this error:
+  #   ipa-server-install: error: idstart (1234) must be larger than UID_MAX/GID_MAX (60000) setting in /etc/login.defs.
+  #
+  # Always make sure it's larger than 65535
+  #   https://en.wikipedia.org/wiki/User_identifier#Reserved_ranges
+  $uid_gid_max = max($facts['ipa_login_defs']['UID_MAX'], $facts['ipa_login_defs']['GID_MAX'])
+  $idstart = (fqdn_rand('10737') + max($uid_gid_max, 65536))
 }
