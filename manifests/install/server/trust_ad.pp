@@ -77,19 +77,19 @@ class ipa::install::server::trust_ad (
   #  password: <AD_ADMIN_PASSWORD>  # Will prompt for password
 
   # Copy IPA helper scripts to host
-  file {
-    default:
-      ensure => file,
-      mode   => '0750',
-      owner  => 'root',
-      group  => 'root',
-      ;
-      '/root/01_config_ipa_ldap.sh':
-        content => template('ipa/config_ipa_ldap.sh.erb'),
-      ;
-      '/root/02_id_override.sh':
-        content => template('ipa/id_override.sh.erb'),
-      ;
+  file { '/root/01_config_ipa_ldap.sh':
+    ensure  => file,
+    mode    => '0750',
+    owner   => 'root',
+    group   => 'root',
+    content => template('ipa/config_ipa_ldap.sh.erb'),
   }
 
+  file { '/root/02_id_override.sh':
+    ensure  => file,
+    mode    => '0750',
+    owner   => 'root',
+    group   => 'root',
+    content => template('ipa/id_override.sh.erb'),
+  }
 }

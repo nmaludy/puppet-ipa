@@ -34,7 +34,7 @@ fi
 if [[ -f /etc/samba/samba.keystore ]]; then
   sudo yum -y install ipa-server-trust-ad samba samba-client
 
-  echo '<%= @admin_password %>' | kinit admin
+  echo '<%= @admin_pass %>' | kinit admin
   ipa-adtrust-install <%= @ad_realm %> --admin=<%= @ad_admin %> -U 2>&1| tee -a "$log"
 fi
 
@@ -93,4 +93,3 @@ while (( i < ${#ad_groups[*]} )); do
 done
 
 echo "End IPA Configure @ $(date +%F)" >> "$log"
-
