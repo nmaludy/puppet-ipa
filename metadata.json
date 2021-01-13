@@ -8,23 +8,23 @@
   "dependencies": [
     {
       "name": "puppetlabs/stdlib",
-      "version_requirement": ">= 4.13.0"
+      "version_requirement": ">= 4.13.0 < 7.0.0"
     },
     {
       "name": "puppet/firewalld",
-      "version_requirement": ">=3.0.0"
+      "version_requirement": ">= 3.0.0 < 5.0.0"
     },
     {
       "name": "ghoneycutt/facter",
-      "version_requirement": ">=3.0.0"
+      "version_requirement": ">= 3.0.0 < 4.0.0"
     },
     {
       "name": "puppet/epel",
-      "version_requirement": ">=3.0.0"
+      "version_requirement": ">= 3.0.0 < 4.0.0"
     },
     {
       "name": "puppetlabs/yumrepo_core",
-      "version_requirement": ">=1.0.0"
+      "version_requirement": ">= 1.0.0 < 2.0.0"
     }
   ],
   "operatingsystem_support": [
