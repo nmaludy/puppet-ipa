@@ -3,26 +3,29 @@ require 'spec_helper'
 describe 'ipa::install::server::master' do
   mock_firewalld
 
+  let(:fqdn) { 'master01.ipa.domain.tld' }
+
   on_supported_os.each do |os, os_facts|
     context "on #{os}" do
-      let(:facts) { os_facts.merge(fqdn: 'master01.ipa.domain.tld') }
-
-      let(:pre_condition) do
-        <<-EOS
-        class { 'ipa':
-          admin_user           => 'admin',
-          admin_password       => 'AdminPassword123',
-          domain               => 'ipa.domain.tld',
-          domain_join_password => 'IpaJoin123',
-          ds_password          => 'DsPassword123',
-          ipa_role             => 'master',
-          ipa_master_fqdn      => 'ipa01.ipa.domain.tld',
-        }
-        EOS
-      end
-
-      let(:sssd_conf) do
-        <<-'EOS'
+      context 'with default params' do
+        let(:facts) { os_facts.merge(fqdn: fqdn) }
+  
+        let(:pre_condition) do
+          <<-EOS
+          class { 'ipa':
+            admin_user           => 'admin',
+            admin_password       => 'AdminPassword123',
+            domain               => 'ipa.domain.tld',
+            domain_join_password => 'IpaJoin123',
+            ds_password          => 'DsPassword123',
+            ipa_role             => 'master',
+            ipa_master_fqdn      => 'ipa01.ipa.domain.tld',
+          }
+          EOS
+        end
+  
+        let(:sssd_conf) do
+          <<-'EOS'
 [domain/ipa.domain.tld]
 debug_level = 3
 cache_credentials = True
@@ -76,18 +79,66 @@ debug_level = 3
 
 [session_recording]
 EOS
+        end
+  
+        it do
+          is_expected.to compile
+        end
+        it do
+          is_expected.to contain_file('/etc/sssd/sssd.conf')
+            .with('ensure'  => 'file',
+                  'mode'    => '0600',
+                  'content' => sssd_conf)
+            .that_requires("Exec[server_install_#{fqdn}]")
+            .that_notifies("Ipa::Helpers::Flushcache[server_#{fqdn}]")
+        end
+        it do
+          is_expected.to contain_exec("server_install_#{fqdn}")
+            .with('command' => "ipa-server-install --hostname=#{fqdn} --realm=IPA.DOMAIN.TLD --domain=ipa.domain.tld --admin-password=$IPA_ADMIN_PASS --ds-password=$DS_PASSWORD   --idstart=69678 --no-ntp    --unattended\n",
+                  'environment' => [ "IPA_ADMIN_PASS=AdminPassword123",
+                                     "DS_PASSWORD=DsPassword123" ],
+                  'path'        => ['/bin', '/sbin', '/usr/sbin', '/usr/bin'],
+                  'timeout'     => 0,
+                  'unless'      => '/usr/sbin/ipactl status >/dev/null 2>&1',
+                  'creates'     => '/etc/ipa/default.conf',
+                  'logoutput'   => 'on_failure')
+            .that_requires('File[/etc/ipa/primary]')
+            .that_notifies('Exec[kinit_master_install]')
+        end
       end
+      
+      context 'with no_ui_redirect' do
+        let(:facts) { os_facts.merge(fqdn: fqdn) }
+  
+        let(:pre_condition) do
+          <<-EOS
+          class { 'ipa':
+            admin_user           => 'admin',
+            admin_password       => 'AdminPassword123',
+            domain               => 'ipa.domain.tld',
+            domain_join_password => 'IpaJoin123',
+            ds_password          => 'DsPassword123',
+            ipa_role             => 'master',
+            ipa_master_fqdn      => 'ipa01.ipa.domain.tld',
+            no_ui_redirect       => true,
+          }
+          EOS
+        end
 
-      it do
-        is_expected.to compile
-      end
-      it do
-        is_expected.to contain_file('/etc/sssd/sssd.conf')
-          .with('ensure'  => 'file',
-                'mode'    => '0600',
-                'content' => sssd_conf)
-          .that_requires('Exec[server_install_master01.ipa.domain.tld]')
-          .that_notifies('Ipa::Helpers::Flushcache[server_master01.ipa.domain.tld]')
+        it { is_expected.to compile }
+        it do
+          is_expected.to contain_exec("server_install_#{fqdn}")
+            .with('command' => "ipa-server-install --hostname=#{fqdn} --realm=IPA.DOMAIN.TLD --domain=ipa.domain.tld --admin-password=$IPA_ADMIN_PASS --ds-password=$DS_PASSWORD   --idstart=69678 --no-ntp --no-ui-redirect   --unattended\n",
+                  'environment' => [ "IPA_ADMIN_PASS=AdminPassword123",
+                                     "DS_PASSWORD=DsPassword123" ],
+                  'path'        => ['/bin', '/sbin', '/usr/sbin', '/usr/bin'],
+                  'timeout'     => 0,
+                  'unless'      => '/usr/sbin/ipactl status >/dev/null 2>&1',
+                  'creates'     => '/etc/ipa/default.conf',
+                  'logoutput'   => 'on_failure')
+            .that_requires('File[/etc/ipa/primary]')
+            .that_notifies('Exec[kinit_master_install]')
+        end
       end
     end
   end
