@@ -4,6 +4,8 @@ describe Puppet::Type.type(:ipa_kinit).provider(:default) do
   let(:name) { 'admin' }
   let(:properties) do
     {
+      # this provider: is necessary, otherwise this provider isn't chosen
+      provider: described_class.name,
       name: name,
       ensure: :present,
       password: 'AdminPassword123',
@@ -56,6 +58,8 @@ EOS
     context 'with realm set' do
       let(:properties) do
         {
+          # this provider: is necessary, otherwise this provider isn't chosen
+          provider: described_class.name,
           name: name,
           realm: 'EXPECTED.DOMAIN.TLD',
         }
@@ -90,6 +94,8 @@ EOS
     context 'when destroying' do
       let(:properties) do
         {
+          # this provider: is necessary, otherwise this provider isn't chosen
+          provider: described_class.name,
           name: name,
           ensure: :absent,
         }
@@ -127,6 +133,8 @@ EOS
       context 'with realm' do
         let(:properties) do
           {
+            # this provider: is necessary, otherwise this provider isn't chosen
+            provider: described_class.name,
             name: name,
             ensure: :present,
             password: 'AdminPassword123',
