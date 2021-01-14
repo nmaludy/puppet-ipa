@@ -5,6 +5,8 @@
   "summary": "Manages IPA servers and clients.",
   "license": "Apache-2.0",
   "source": "https://github.com/EncoreTechnologies/puppet-ipa",
+  "project_page": "https://github.com/EncoreTechnologies/puppet-ipa",
+  "issues_url": "https://github.com/EncoreTechnologies/puppet-ipa/issues",
   "dependencies": [
     {
       "name": "puppetlabs/stdlib",
