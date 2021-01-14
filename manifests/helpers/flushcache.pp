@@ -18,12 +18,13 @@ define ipa::helpers::flushcache {
     enable => true,
   }
 
-  ~> if $ipa::install_autofs {
+  if $ipa::install_autofs {
     exec { 'stop_autofs':
       command     => inline_epp($ipa::params::service_stop_epp,
                                 {'service' => $ipa::params::autofs_service}),
       path        => ['/sbin', '/bin', '/usr/bin'],
       refreshonly => true,
+      subscribe   => Service['sssd'],
     }
     ~> exec { 'wait_for_sssd':
       command     => 'sleep 3',

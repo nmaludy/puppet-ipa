@@ -68,7 +68,7 @@ class ipa::install::server::master (
   -> exec { "server_install_${$facts['fqdn']}":
     command     => $server_install_cmd,
     environment => [ "IPA_ADMIN_PASS=${admin_pass}", "DS_PASSWORD=${ds_password}" ],
-    path        => ['bin', '/sbin', '/usr/sbin'],
+    path        => ['/bin', '/sbin', '/usr/sbin', '/usr/bin'],
     timeout     => 0,
     unless      => '/usr/sbin/ipactl status >/dev/null 2>&1',
     creates     => '/etc/ipa/default.conf',

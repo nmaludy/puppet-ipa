@@ -62,7 +62,7 @@ class ipa::install::client (
   exec { "client_install_${$facts['fqdn']}":
     command     => $client_install_cmd,
     environment => [ "IPA_JOIN_PASSWORD=${principal_pass.unwrap}" ],
-    path        => ['/bin', '/sbin', '/usr/sbin'],
+    path        => ['/bin', '/sbin', '/usr/sbin', '/usr/bin'],
     timeout     => 0,
     unless      => "cat /etc/ipa/default.conf | grep -i \"${domain_name}\"",
     creates     => '/etc/ipa/default.conf',

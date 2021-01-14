@@ -206,7 +206,7 @@ class ipa (
   String               $domain_join_principal    = '',
   Boolean              $enable_hostname          = true,
   Boolean              $fixed_primary            = false,
-  Integer              $idstart                  = (fqdn_rand('10737')  +  10000),
+  Integer              $idstart                  = $ipa::params::idstart,
   Boolean              $ignore_group_members     = false,
   Boolean              $install_autofs           = true,
   Boolean              $install_epel             = false,
@@ -245,8 +245,7 @@ class ipa (
   Boolean              $server_install_ldaputils = true,
   Array[String]        $sssd_services            = ['nss','sudo','pam','ssh','autofs'],
   Boolean              $trust_dns                = true,
-  )
-  {
+) inherits ipa::params {
 
   if $manage {
 
