@@ -1,6 +1,8 @@
 require File.expand_path(File.join(File.dirname(__FILE__), '..', 'ipa'))
 
 Puppet::Type.type(:ipa_kinit).provide(:default, parent: Puppet::Provider::Ipa) do
+  defaultfor kernel: 'Linux'
+
   commands kinit: 'kinit'
   commands klist: 'klist'
   commands kdestroy: 'kdestroy'
@@ -59,7 +61,7 @@ Puppet::Type.type(:ipa_kinit).provide(:default, parent: Puppet::Provider::Ipa) d
         break
       end
     rescue Puppet::ExecutionFailure => e
-      Puppet.debug("lklist returned an error: #{e}")
+      Puppet.debug("klist returned an error: #{e}")
     end
     instance = { ensure: :absent, name: resource[:name] } if instance.nil?
     Puppet.debug("klist instance = #{instance}")

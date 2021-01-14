@@ -54,7 +54,8 @@ Gemfile:
       - gem: 'yaml-lint'
         version: '>= 0.0.10'
 spec/spec_helper.rb:
-  mock_with: ':mocha'
+  # rspec mock is preferred, mocha was old (according to puppetlabs_spec_helper/CHANGELOG.md)
+  mock_with: ':rspec'
   strict_level: ':warning'
   spec_overrides:
     # print out really long exception messages (this prevents them from being truncated)
