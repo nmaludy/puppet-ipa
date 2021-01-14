@@ -43,6 +43,7 @@ group :development do
   gem "r10k", '>= 3.0.0',                                                      require: false
   gem "cri", '2.15.6',                                                         require: false
   gem "yaml-lint", '>= 0.0.10',                                                require: false
+  gem "mocha", '>= 1.0.0',                                                     require: false
 end
 
 puppet_version = ENV['PUPPET_GEM_VERSION']
