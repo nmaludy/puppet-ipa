@@ -4,7 +4,7 @@ Puppet::Type.type(:ipa_kinit).provide(:default, parent: Puppet::Provider::Ipa) d
   commands kinit: 'kinit'
   commands klist: 'klist'
   commands kdestroy: 'kdestroy'
-  
+
   # always need to define this in our implementation classes
   mk_resource_methods
 
@@ -29,38 +29,37 @@ Puppet::Type.type(:ipa_kinit).provide(:default, parent: Puppet::Provider::Ipa) d
         principal_parts = principal_name.split('@')
         principal_user = principal_parts[0]
         principal_realm = principal_parts[1]
-        
+
         Puppet.debug("klist got principal_name: #{principal_name}")
         Puppet.debug("klist got principal_user: #{principal_user}")
         Puppet.debug("klist got principal_realm: #{principal_realm}")
-        if resource[:name] == principal_user
-          Puppet.debug("klist principal_user matches our user!")
-          if resource[:realm]
-            Puppet.debug("klist has a realm #{resource[:realm]}")
-            if resource[:realm] == principal_realm
-              Puppet.debug("klist principal_realm matches our realm!")
-              instance = {
-                ensure: :present,
-                name: principal_user,
-                realm: principal_realm,
-                principal_name: principal_name,
-              }
-              break
-            end
-          else
-            # no realm passed in, assume username/principal matching is good enough
-            Puppet.debug("klist no realm was passed in and our principal user matches, good enough!")
-            instance = {
-              ensure: :present,
-              name: resource[:name],
-              principal_name: principal_name,
-            }
-            break
-          end
+        next if resource[:name] != principal_user
+
+        Puppet.debug('klist principal_user matches our user!')
+        if resource[:realm]
+          Puppet.debug("klist has a realm #{resource[:realm]}")
+          next if resource[:realm] != principal_realm
+
+          Puppet.debug('klist principal_realm matches our realm!')
+          instance = {
+            ensure: :present,
+            name: principal_user,
+            realm: principal_realm,
+            principal_name: principal_name,
+          }
+        else
+          # no realm passed in, assume username/principal matching is good enough
+          Puppet.debug('klist no realm was passed in and our principal user matches, good enough!')
+          instance = {
+            ensure: :present,
+            name: principal_user,
+            principal_name: principal_name,
+          }
         end
+        break
       end
-    rescue Puppet::ExecutionFailure
-      Puppet.debug("klist returned an error")
+    rescue Puppet::ExecutionFailure => e
+      Puppet.debug("lklist returned an error: #{e}")
     end
     instance = { ensure: :absent, name: resource[:name] } if instance.nil?
     Puppet.debug("klist instance = #{instance}")

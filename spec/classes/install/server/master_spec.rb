@@ -103,7 +103,7 @@ EOS
                   'creates'     => '/etc/ipa/default.conf',
                   'logoutput'   => 'on_failure')
             .that_requires('File[/etc/ipa/primary]')
-            .that_notifies('Exec[kinit_master_install]')
+            .that_notifies('Ipa_kinit[admin]')
         end
       end
 
@@ -137,7 +137,7 @@ EOS
                   'creates'     => '/etc/ipa/default.conf',
                   'logoutput'   => 'on_failure')
             .that_requires('File[/etc/ipa/primary]')
-            .that_notifies('Exec[kinit_master_install]')
+            .that_notifies('Ipa_kinit[admin]')
         end
       end
     end
