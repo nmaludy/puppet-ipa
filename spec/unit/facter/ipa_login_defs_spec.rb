@@ -37,11 +37,11 @@ EOS
 
   before :each do
     Facter.clear
-    # mock the File.readlines and give it some fake output of our file
-    File.expects(:readlines).with('/etc/login.defs').returns(mock_etc_login_defs)
   end
 
   it 'returns a value' do
+    # mock the File.readlines and give it some fake output of our file
+    expect(File).to receive(:readlines).with('/etc/login.defs').and_return(mock_etc_login_defs)
     expected_fact = {
       'MAIL_DIR' => '/var/spool/mail',
       'UID_MIN' => 1_000,

@@ -19,10 +19,11 @@ Principal name                 Cache name
 --------------                 ----------
 admin@IPA.DOMAIN.TLD           KCM:0
 EOS
-      provider.expects(:klist).with('-l').returns(klist_return)
-      expect(provider.read_instance).to eq(ensure: :present,
-                                           name: name,
-                                           principal_name: 'admin@IPA.DOMAIN.TLD')
+      prov = resource.provider
+      expect(prov).to receive(:klist).with('-l').and_return(klist_return)
+      expect(prov.read_instance).to eq(ensure: :present,
+                                       name: name,
+                                       principal_name: 'admin@IPA.DOMAIN.TLD')
     end
 
     it 'return {ensure: absent} instance when no names match' do
@@ -31,7 +32,7 @@ Principal name                 Cache name
 --------------                 ----------
 xyz@IPA.DOMAIN.TLD             KCM:0
 EOS
-      provider.expects(:klist).with('-l').returns(klist_return)
+      expect(provider).to receive(:klist).with('-l').and_return(klist_return)
       expect(provider.read_instance).to eq(ensure: :absent, name: name)
     end
 
@@ -41,14 +42,14 @@ Principal name                 Cache name
 --------------                 ----------
 admin@DIFFERENT.DOMAIN.TLD     KCM:0
 EOS
-      provider.expects(:klist).with('-l').returns(klist_return)
+      expect(provider).to receive(:klist).with('-l').and_return(klist_return)
       expect(provider.read_instance).to eq(ensure: :present,
                                            name: name,
                                            principal_name: 'admin@DIFFERENT.DOMAIN.TLD')
     end
 
     it 'return {ensure: absent} instance when klist fails' do
-      provider.expects(:klist).with('-l').raises(Puppet::ExecutionFailure.new('x'))
+      expect(provider).to receive(:klist).with('-l').and_raise(Puppet::ExecutionFailure.new('x'))
       expect(provider.read_instance).to eq(ensure: :absent, name: name)
     end
 
@@ -66,7 +67,7 @@ Principal name                 Cache name
 --------------                 ----------
 admin@EXPECTED.DOMAIN.TLD      KCM:0
 EOS
-        provider.expects(:klist).with('-l').returns(klist_return)
+        expect(provider).to receive(:klist).with('-l').and_return(klist_return)
         expect(provider.read_instance).to eq(ensure: :present,
                                              name: name,
                                              principal_name: 'admin@EXPECTED.DOMAIN.TLD',
@@ -79,7 +80,7 @@ Principal name                 Cache name
 --------------                 ----------
 admin@BAD.DOMAIN.TLD      KCM:0
 EOS
-        provider.expects(:klist).with('-l').returns(klist_return)
+        expect(provider).to receive(:klist).with('-l').and_return(klist_return)
         expect(provider.read_instance).to eq(ensure: :absent, name: name)
       end
     end
@@ -102,19 +103,16 @@ EOS
       end
 
       it 'run kdestroy with the principal name' do
-        provider.expects(:kdestroy).with(['-p', 'admin@IPA.DOMAIN.TLD'])
+        expect(provider).to receive(:kdestroy).with(['-p', 'admin@IPA.DOMAIN.TLD'])
         provider.flush_instance
       end
     end
 
     context 'when creating' do
-      before(:each) do
-        provider.expects(:command).with(:kinit).returns('/bin/kinit')
-      end
-
       it 'run kinit with username and password' do
         command_str = 'echo $KINIT_PASSWORD | /bin/kinit admin'
-        Puppet::Util::Execution.expects(:execute).with(
+        expect(provider).to receive(:command).with(:kinit).and_return('/bin/kinit')
+        expect(Puppet::Util::Execution).to receive(:execute).with(
           command_str,
           override_locale: false,
           failonfail: true,
@@ -138,7 +136,8 @@ EOS
 
         it 'run kinit with username@realm specified' do
           command_str = 'echo $KINIT_PASSWORD | /bin/kinit admin@EXPECTED.DOMAIN.TLD'
-          Puppet::Util::Execution.expects(:execute).with(
+          expect(provider).to receive(:command).with(:kinit).and_return('/bin/kinit')
+          expect(Puppet::Util::Execution).to receive(:execute).with(
             command_str,
             override_locale: false,
             failonfail: true,
