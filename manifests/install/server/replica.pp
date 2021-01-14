@@ -9,7 +9,6 @@ class ipa::install::server::replica (
   String             $service_restart  = $ipa::params::service_restart_epp,
   String             $sssd_service     = $ipa::params::sssd_service,
 ) {
-
   # Build replica install command
   $replica_install_cmd = @("EOC"/)
     ipa-replica-install \
@@ -17,11 +16,6 @@ class ipa::install::server::replica (
     --admin-password=\$IPA_ADMIN_PASS \
     ${install_opts} \
     --unattended
-    | EOC
-
-  # Build kinit command (Puppet doesn't like to escape $ nor accept all cap variables)
-  $kinit_cmd = @("EOC"/)
-    echo \$IPA_ADMIN_PASS | kinit ${admin_user}
     | EOC
 
   # Set puppet fact for IPA role
@@ -32,6 +26,7 @@ class ipa::install::server::replica (
   contain ipa::helpers::firewalld
 
   if str2bool($facts['ipa_installed']) != true {
+    include ipa::install::server::kinit
 
     # Needed to ensure ipa-replica-install succeeds if new client is installed.
     exec { 'replica_restart_sssd':
@@ -40,13 +35,7 @@ class ipa::install::server::replica (
       tag         => 'ipa::install::replica',
       refreshonly => true,
     }
-
-    ~> exec { 'replica_kinit_admin':
-      command     => $kinit_cmd,
-      environment => [ "IPA_ADMIN_PASS=${principal_pass.unwrap}" ],
-      path        => ['/bin'],
-    }
-
+    ~> Ipa_kinit[$admin_user]
     -> exec { 'replica_server_install':
       command     => $replica_install_cmd,
       environment => [ "IPA_ADMIN_PASS=${principal_pass.unwrap}" ],

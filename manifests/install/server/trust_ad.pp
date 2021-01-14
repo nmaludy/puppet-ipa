@@ -34,18 +34,10 @@ class ipa::install::server::trust_ad (
     --password
     | EOC
 
-  # Build kinit command (Puppet doesn't like to escape $ nor accept all cap variables)
-  $kinit_cmd = @("EOC"/)
-    echo \$IPA_ADMIN_PASS | kinit ${admin_user}
-    | EOC
-
-
   if $ad_password != '' and str2bool($facts['trust_ad']) != true {
-    exec { 'trust_ad_kinit_admin':
-      command     => $kinit_cmd,
-      environment => [ "IPA_ADMIN_PASS=${admin_pass}" ],
-      path        => ['bin', '/sbin', '/usr/sbin'],
-    }
+    include ipa::install::server::kinit
+
+    Ipa_kinit[$admin_user]
     -> exec { 'trust_ad_install':
       command   => $adtrust_install_cmd,
       path      => ['bin', '/sbin', '/usr/sbin'],

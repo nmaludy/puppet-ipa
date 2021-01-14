@@ -5,19 +5,19 @@
 #
 
 class ipa::install (
-  String     $auto_home_share     = $ipa::automount_home_share,
-  String     $auto_location       = $ipa::automount_location,
-  String     $autofs_package      = $ipa::params::autofs_package_name,
-  Boolean    $configure_dns       = $ipa::final_configure_dns_server,
-  Boolean    $install_ad_trust    = $ipa::install_trust_ad,
-  Boolean    $install_autofs      = $ipa::install_autofs,
-  Boolean    $install_epel        = $ipa::install_epel,
-  Boolean    $install_ipa_server  = $ipa::install_ipa_server,
-  Boolean    $install_sssd        = $ipa::install_sssd,
-  Boolean    $install_sssd_tools  = $ipa::install_sssdtools,
-  String     $ipa_role            = $ipa::ipa_role,
-  String     $sssd_package_name   = $ipa::params::sssd_package_name,
-  String     $sssd_tools_package  = $ipa::params::sssdtools_package_name,
+  String  $auto_home_share     = $ipa::automount_home_share,
+  String  $auto_location       = $ipa::automount_location,
+  String  $autofs_package      = $ipa::params::autofs_package_name,
+  Boolean $configure_dns       = $ipa::final_configure_dns_server,
+  Boolean $install_ad_trust    = $ipa::install_trust_ad,
+  Boolean $install_autofs      = $ipa::install_autofs,
+  Boolean $install_epel        = $ipa::install_epel,
+  Boolean $install_ipa_server  = $ipa::install_ipa_server,
+  Boolean $install_sssd        = $ipa::install_sssd,
+  Boolean $install_sssd_tools  = $ipa::install_sssdtools,
+  String  $ipa_role            = $ipa::ipa_role,
+  String  $sssd_package_name   = $ipa::params::sssd_package_name,
+  String  $sssd_tools_package  = $ipa::params::sssdtools_package_name,
 ) {
   # Do we want to do this or rely on Satellite repository?
   if $install_epel and $facts['os']['family'] == 'RedHat' {

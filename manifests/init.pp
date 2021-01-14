@@ -172,7 +172,7 @@
 #      (integer) The HTTPS port to use for the reverse proxy. Cannot be 443.
 #
 class ipa (
-  String               $admin_user               = '',
+  String               $admin_user               = 'admin',
   String               $admin_password           = '',
   String               $ad_domain                = '',
   Array[String]        $ad_groups                = [],

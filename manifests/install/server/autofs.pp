@@ -1,18 +1,13 @@
 #
 class ipa::install::server::autofs (
-  String  $ad_domain             = $ipa::ad_trust_realm,
-  String  $admin_pass            = $ipa::admin_password,
-  String  $admin_user            = $ipa::admin_user,
-  String  $autofs_package        = $ipa::params::autofs_package_name,
-  String  $automount_home_dir    = "/home/ipa/${ad_domain}",
-  String  $automount_home_share  = undef,
-  String  $automount_location    = undef,
+  String $ad_domain             = $ipa::ad_trust_realm,
+  String $admin_user            = $ipa::admin_user,
+  String $autofs_package        = $ipa::params::autofs_package_name,
+  String $automount_home_dir    = "/home/ipa/${ad_domain}",
+  String $automount_home_share  = undef,
+  String $automount_location    = undef,
 ) {
-
-  # Build kinit command (Puppet doesn't like to escape $ nor accept all cap variables)
-  $kinit_cmd = @("EOC"/)
-    echo \$IPA_ADMIN_PASS | kinit ${admin_user}
-    | EOC
+  include ipa::install::server::kinit
 
   # automount map home command
   $map_home_cmd = "ipa automountmap-add ${automount_location} auto.home"
@@ -37,43 +32,36 @@ class ipa::install::server::autofs (
   # install the package
   ensure_resource('package', $autofs_package, { 'ensure' => 'present' })
 
-  if str2bool($facts['autofs_installed']) != true {
+  Ipa_kinit[$admin_user]
+  -> exec { "automount_map_home_${$facts['fqdn']}":
+    command => $map_home_cmd,
+    unless  => "ipa automountmap-find ${automount_location} --map auto.home",
+    path    => ['/bin', '/usr/bin'],
+    notify  => Ipa::Helpers::Flushcache["server_${$facts['fqdn']}"],
+  }
+  ~> exec { "automount_key_home_${$facts['fqdn']}":
+    command => $key_home_cmd,
+    unless  => "ipa automountkey-find ${automount_location} auto.home --key='*'",
+    path    => ['/bin', '/usr/bin'],
+    notify  => Ipa::Helpers::Flushcache["server_${$facts['fqdn']}"],
+  }
+  ~> exec { "automount_key_master_${$facts['fqdn']}":
+    command     => $key_master_cmd,
+    path        => ['/bin', '/usr/bin'],
+    refreshonly => true,
+    notify      => Ipa::Helpers::Flushcache["server_${$facts['fqdn']}"],
+  }
+  ~> exec { 'ipa_config_mod_homedir':
+    command     => $config_homedir_cmd,
+    path        => ['/bin', '/usr/bin'],
+    refreshonly => true,
+  }
 
-    exec { 'kinit_autofs_configure':
-      command     => $kinit_cmd,
-      environment => [ "IPA_ADMIN_PASS=${admin_pass}" ],
-      path        => ['/bin', '/usr/bin'],
-      notify      => Ipa::Helpers::Flushcache["server_${$facts['fqdn']}"],
-    }
-
-    ~> exec { "automount_map_home_${$facts['fqdn']}":
-      command     => $map_home_cmd,
-      path        => ['/bin', '/usr/bin'],
-      refreshonly => true,
-    }
-
-    ~> exec { "automount_key_home_${$facts['fqdn']}":
-      command     => $key_home_cmd,
-      path        => ['/bin', '/usr/bin'],
-      refreshonly => true,
-    }
-
-    ~> exec { "automount_key_master_${$facts['fqdn']}":
-      command     => $key_master_cmd,
-      path        => ['/bin', '/usr/bin'],
-      refreshonly => true,
-    }
-
-    ~> exec { 'ipa_config_mod_homedir':
-      command     => $config_homedir_cmd,
-      path        => ['/bin', '/usr/bin'],
-      refreshonly => true,
-    }
-
-    exec { 'autofs_create_automount_home_dir':
-      command => "mkdir -p ${automount_home_dir}",
-      path    => ['/bin', '/usr/bin'],
-      creates => $automount_home_dir,
+  if !defined(File[$automount_home_dir]) {
+    file { $automount_home_dir:
+      ensure => directory,
+      owner  => 'root',
+      group  => 'root',
     }
   }
 
@@ -85,10 +73,4 @@ class ipa::install::server::autofs (
     match  => '^automount:.*',
     notify => Ipa::Helpers::Flushcache["server_${$facts['fqdn']}"],
   }
-
-  # Set puppet fact for autofs installed
-  facter::fact { 'autofs_installed':
-    value => true,
-  }
-
 }
