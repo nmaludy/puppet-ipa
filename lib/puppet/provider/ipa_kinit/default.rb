@@ -1,6 +1,8 @@
 require File.expand_path(File.join(File.dirname(__FILE__), '..', 'ipa'))
 
 Puppet::Type.type(:ipa_kinit).provide(:default, parent: Puppet::Provider::Ipa) do
+  defaultfor kernel: 'Linux'
+
   commands kinit: 'kinit'
   commands klist: 'klist'
   commands kdestroy: 'kdestroy'
