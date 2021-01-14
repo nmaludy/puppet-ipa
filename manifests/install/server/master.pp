@@ -44,11 +44,6 @@ class ipa::install::server::master (
     --unattended
     | EOC
 
-  # Build kinit command (Puppet doesn't like to escape $ nor accept all cap variables)
-  $kinit_cmd = @("EOC"/)
-    echo \$IPA_ADMIN_PASS | kinit ${admin_user}
-    | EOC
-
   # Set default login shell command
   $config_shell_cmd = 'ipa config-mod --defaultshell="/bin/bash"'
 
@@ -73,7 +68,7 @@ class ipa::install::server::master (
     unless      => '/usr/sbin/ipactl status >/dev/null 2>&1',
     creates     => '/etc/ipa/default.conf',
     logoutput   => 'on_failure',
-    notify      => Exec['kinit_master_install'],
+    notify      => Ipa_kinit[$admin_user],
   }
 
   facter::fact { 'ipa_installed':
@@ -103,14 +98,10 @@ class ipa::install::server::master (
     notify  => Ipa::Helpers::Flushcache["server_${$facts['fqdn']}"],
   }
 
-  exec { 'kinit_master_install':
-    command     => $kinit_cmd,
-    environment => [ "IPA_ADMIN_PASS=${admin_pass}" ],
-    path        => ['/bin'],
-    refreshonly => true,
-  }
+  include ipa::install::server::kinit
 
   # Configure IPA server default settings.
+  Ipa_kinit[$admin_user]
   -> exec { 'ipa_config_mod_shell':
     command     => $config_shell_cmd,
     path        => ['/bin', '/usr/bin'],
