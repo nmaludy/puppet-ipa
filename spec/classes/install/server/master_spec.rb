@@ -9,7 +9,7 @@ describe 'ipa::install::server::master' do
     context "on #{os}" do
       context 'with default params' do
         let(:facts) { os_facts.merge(fqdn: fqdn) }
-  
+
         let(:pre_condition) do
           <<-EOS
           class { 'ipa':
@@ -23,7 +23,7 @@ describe 'ipa::install::server::master' do
           }
           EOS
         end
-  
+
         let(:sssd_conf) do
           <<-'EOS'
 [domain/ipa.domain.tld]
@@ -80,7 +80,7 @@ debug_level = 3
 [session_recording]
 EOS
         end
-  
+
         it do
           is_expected.to compile
         end
@@ -94,9 +94,9 @@ EOS
         end
         it do
           is_expected.to contain_exec("server_install_#{fqdn}")
-            .with('command' => "ipa-server-install --hostname=#{fqdn} --realm=IPA.DOMAIN.TLD --domain=ipa.domain.tld --admin-password=$IPA_ADMIN_PASS --ds-password=$DS_PASSWORD   --idstart=69678 --no-ntp    --unattended\n",
-                  'environment' => [ "IPA_ADMIN_PASS=AdminPassword123",
-                                     "DS_PASSWORD=DsPassword123" ],
+            .with('command' => "ipa-server-install --hostname=#{fqdn} --realm=IPA.DOMAIN.TLD --domain=ipa.domain.tld --admin-password=$IPA_ADMIN_PASS --ds-password=$DS_PASSWORD   --idstart=69678 --no-ntp    --unattended\n", # rubocop:disable LineLength
+                  'environment' => ['IPA_ADMIN_PASS=AdminPassword123',
+                                    'DS_PASSWORD=DsPassword123'],
                   'path'        => ['/bin', '/sbin', '/usr/sbin', '/usr/bin'],
                   'timeout'     => 0,
                   'unless'      => '/usr/sbin/ipactl status >/dev/null 2>&1',
@@ -106,10 +106,10 @@ EOS
             .that_notifies('Exec[kinit_master_install]')
         end
       end
-      
+
       context 'with no_ui_redirect' do
         let(:facts) { os_facts.merge(fqdn: fqdn) }
-  
+
         let(:pre_condition) do
           <<-EOS
           class { 'ipa':
@@ -128,9 +128,9 @@ EOS
         it { is_expected.to compile }
         it do
           is_expected.to contain_exec("server_install_#{fqdn}")
-            .with('command' => "ipa-server-install --hostname=#{fqdn} --realm=IPA.DOMAIN.TLD --domain=ipa.domain.tld --admin-password=$IPA_ADMIN_PASS --ds-password=$DS_PASSWORD   --idstart=69678 --no-ntp --no-ui-redirect   --unattended\n",
-                  'environment' => [ "IPA_ADMIN_PASS=AdminPassword123",
-                                     "DS_PASSWORD=DsPassword123" ],
+            .with('command' => "ipa-server-install --hostname=#{fqdn} --realm=IPA.DOMAIN.TLD --domain=ipa.domain.tld --admin-password=$IPA_ADMIN_PASS --ds-password=$DS_PASSWORD   --idstart=69678 --no-ntp --no-ui-redirect   --unattended\n", # rubocop:disable LineLength
+                  'environment' => ['IPA_ADMIN_PASS=AdminPassword123',
+                                    'DS_PASSWORD=DsPassword123'],
                   'path'        => ['/bin', '/sbin', '/usr/sbin', '/usr/bin'],
                   'timeout'     => 0,
                   'unless'      => '/usr/sbin/ipactl status >/dev/null 2>&1',
