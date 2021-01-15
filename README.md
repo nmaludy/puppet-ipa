@@ -163,6 +163,64 @@ If true, then the parameter '--no-ui-redirect' is passed to the IPA server insta
 #### `realm`
 The name of the IPA realm to create or join (UPPERCASE).
 
+### Cipher hardening on CentOS/RHEL 8
+
+**NOTE:** These settings are automatically applied inside of `ipa::params`,
+they are documented here as a reference.
+
+```puppet
+    # IPA on RHEL/CentOS 8 switched to mod_ssl, away from mod_nss
+    # mod_ssl in RHEL/CentOS 8 uses the "system" cryto policy for its ciphers and protocols
+    # see:
+    # https://www.redhat.com/en/blog/how-customize-crypto-policies-rhel-82
+    # https://access.redhat.com/articles/3642912
+    # https://access.redhat.com/documentation/en-us/red_hat_enterprise_linux/8/html/security_hardening/using-the-system-wide-cryptographic-policies_security-hardening
+    $nss_ssl_ciphers = []
+    $nss_ssl_protocols = []
+    
+    $ds_ssl_ciphers = [
+      # TLS 1.2
+      '+TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256',
+      '+TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384',
+      '+TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256',
+      '+TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384',
+      # TLS 1.3
+      '+TLS_AES_128_GCM_SHA256',
+      '+TLS_AES_256_GCM_SHA384',
+      '+TLS_CHACHA20_POLY1305_SHA256',
+    ]
+    $ds_ssl_min_version = 'TLS1.2'
+    
+    # Dogtag PKI Tomcat
+    # you _must_ set both the TLS 1.2 and 1.3 ciphers here though, otherwise you'll get an error
+    # when registering your clients:
+    # Joining realm failed: HTTP POST to URL 'https://freeipa.maludy.home:443/ipa/xml' failed.  libcurl failed even to execute the HTTP transaction, explaining:  SSL certificate problem: EE certificate key too weak
+    $pki_ssl_ciphers = [
+      # TLS 1.2
+      '+TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256',
+      '+TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384',
+      '+TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256',
+      '+TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384',
+      # TLS 1.3
+      '+TLS_AES_128_GCM_SHA256',
+      '+TLS_AES_256_GCM_SHA384',
+      '+TLS_CHACHA20_POLY1305_SHA256',
+    ]
+    # PKI Tomcat doesn't, yet, support tls1_3 protocol, so leave it to 1.2
+    # if you try to set it to tls1_2:tls1_3 pki-tomcatd@pki-tomcat.service service will fail to start
+    $pki_ssl_protocol_range = 'tls1_2:tls1_2'
+    
+    class { 'ipa':
+     ipa_role => 'master',
+     # nss ciphers and protocols not used in CentOS 8
+     nss_ssl_ciphers        => $nss_ssl_ciphers,
+     nss_ssl_protocols      => $nss_ssl_protocols,
+     ds_ssl_ciphers         => $ds_ssl_ciphers,
+     ds_ssl_min_version     => $ds_ssl_min_version,
+     pki_ssl_ciphers        => $pki_ssl_ciphers,
+     pki_ssl_protocol_range => $pki_ssl_protocol_range,
+   }
+```
 
 ## Limitations
 
