@@ -1,12 +1,12 @@
 # Private class to manage IPA PKI certificate server (Dogtag)
 class ipa::install::server::pki (
-  String $ssl_protocol_range = $ipa::pki_ssl_protocol_range,
+  Optional[String] $ssl_protocol_range = $ipa::pki_ssl_protocol_range,
   Optional[Array[String]] $ssl_ciphers   = $ipa::pki_ssl_ciphers,
 ) inherits ipa {
   $config_file = '/etc/pki/pki-tomcat/server.xml'
 
   # Setup PKI CA service (Dogtag) with secure SSL settings
-  if $ssl_protocol_range {
+  if $ssl_protocol_range and !$ssl_protocol_range.empty() {
     exec { '/etc/pki/pki-tomcat/server.xml:sslVersionRangeStream':
       command => "sed -i 's/sslVersionRangeStream=\"[^\"]*\"/sslVersionRangeStream=\"${ssl_protocol_range}\"/g' ${config_file}",
       path    => ['/bin', '/sbin', '/usr/sbin'],
@@ -21,7 +21,7 @@ class ipa::install::server::pki (
     }
   }
 
-  if $ssl_ciphers {
+  if $ssl_ciphers and !$ssl_ciphers.empty() {
     $ciphers = $ssl_ciphers.join(',')
 
     exec { '/etc/pki/pki-tomcat/server.xml:sslRangeCiphers':

@@ -107,7 +107,7 @@ class ipa::install::client (
     }
 
     # Update nsswitch if autofs enabled.
-    ~> file_line { '/etc/nsswitch.conf':
+    ~> file_line { '/etc/nsswitch.conf_automount':
       path   => '/etc/nsswitch.conf',
       line   => 'automount:  files sss',
       match  => '^automount: ',
@@ -116,7 +116,7 @@ class ipa::install::client (
   }
 
   # Update nsswitch with sudoers config
-  file_line { '/etc/nsswitch.conf':
+  file_line { '/etc/nsswitch.conf_sudoers':
     path   => '/etc/nsswitch.conf',
     line   => 'sudoers:  files sss',
     match  => '^sudoers: ',
