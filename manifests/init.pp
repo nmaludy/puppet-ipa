@@ -271,5 +271,4 @@ class ipa (
 
   class {'ipa::validate_params':}
   -> class {'ipa::install':}
-
 }

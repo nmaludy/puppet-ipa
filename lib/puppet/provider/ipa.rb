@@ -1,3 +1,9 @@
+require File.expand_path(File.join(File.dirname(__FILE__), '..', '..',
+                                   'puppet_x', 'encore', 'ipa', 'http_client'))
+require File.expand_path(File.join(File.dirname(__FILE__), '..', '..',
+                                   'puppet_x', 'encore', 'ipa', 'cache'))
+require 'cgi'
+
 # This class is a "base" provider to use to implement your own custom providers here
 # at Encore.
 class Puppet::Provider::Ipa < Puppet::Provider
@@ -104,5 +110,67 @@ class Puppet::Provider::Ipa < Puppet::Provider
   #  cached_instance[:xxx] to compare against (that's why it exists)
   def flush_instance
     raise NotImplementedError, 'flush_instance needs to be implemented by child providers'
+  end
+
+  def api_client
+    # create an HTTP client with this username/password and cache it
+    # be sure to use resource[:xxx] here so that we can use the parameters
+    # set by the user in the DSL declaration of this resource
+    client_id = resource[:api_url] + resource[:api_username]
+    client = PuppetX::Encore::Ipa::Cache.instance.cached_clients[client_id]
+    if client.nil?
+      client = PuppetX::Encore::Ipa::HTTPClient.new(headers: {"Referer" => api_make_url('')})
+      api_login(client: client)
+      # only save client to cache upon successful login
+      PuppetX::Encore::Ipa::Cache.instance.cached_clients[client_id] = client
+    end
+    client
+  end
+
+  def api_make_url(endpoint)
+    "#{resource[:api_url]}#{endpoint}"
+  end
+
+  def api_login(username: resource[:api_username],
+                password: resource[:api_password],
+                persist_auth: true,
+                client: api_client)
+    # https://access.redhat.com/articles/2728021#end-point-pwd
+    headers = {
+      "Content-Type" => "application/x-www-form-urlencoded",
+      "Accept" => "text/plain",
+    }
+    form = {
+      "user" => username,
+      "password" => password,
+    }
+    response = client.post(api_make_url('/session/login_password'),
+                           form: form,
+                           headers: headers)
+    # note: don't check for API response 'error' key here because the response
+    # is plain text and not JSON
+    if persist_auth
+      cookies = response.get_fields('Set-Cookie')
+      client.update_headers({'Cookie' => cookies.join('; ')})
+    end
+    response
+  end
+
+  def api_response_raise_if_error(response)
+    body = JSON.parse(response.body)
+    error = body['error']
+    return response unless error
+
+    raise Puppet::Error, "Received API error from IPA: #{error}"
+  end
+  
+  def api_post(endpoint, body: nil, json_parse: true)
+    response = api_client.post(api_make_url(endpoint), body: body)
+    api_response_raise_if_error(response)
+    if json_parse
+      JSON.parse(response.body)
+    else
+      response
+    end
   end
 end
