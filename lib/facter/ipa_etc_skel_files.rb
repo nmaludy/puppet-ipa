@@ -4,7 +4,7 @@ Facter.add(:ipa_etc_skel_files) do
   setcode do
     require 'find'
     base_dir = '/etc/skel'
-    files = Find.find(base_dir).select { |path| path != base_dir }
+    files = Find.find(base_dir).reject { |path| path == base_dir }
     files_hash = {}
     files.each do |path|
       type = File.directory?(path) ? 'directory' : 'file'

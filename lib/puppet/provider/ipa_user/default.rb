@@ -17,21 +17,19 @@ Puppet::Type.type(:ipa_user).provide(:default, parent: Puppet::Provider::Ipa) do
   #       state of the resource from the API each time
   def read_instance
     body = {
-      "id" => 0,
-      "method" => "user_find/1",
-      "params" => [
+      'id' => 0,
+      'method' => 'user_find/1',
+      'params' => [
         # args (positional arguments)
-        [
-          resource[:name]
-        ],
+        [resource[:name]],
         # options (CLI flags / options)
         {
           'all' => true,
         },
-      ]
+      ],
     }
     response_body = api_post('/session/json', body: body, json_parse: true)
-    user_list = response_body["result"]["result"]
+    user_list = response_body['result']['result']
     user = user_list.find { |u| u['uid'][0] == resource[:name] }
 
     instance = nil
@@ -61,48 +59,44 @@ Puppet::Type.type(:ipa_user).provide(:default, parent: Puppet::Provider::Ipa) do
     case resource[:ensure]
     when :absent
       body = {
-        "id" => 0,
-        "method" => "user_del/1",
-        "params" => [
+        'id' => 0,
+        'method' => 'user_del/1',
+        'params' => [
           # args (positional arguments)
-          [
-            resource[:name]
-          ],
+          [resource[:name]],
           # options (CLI flags / options)
           {},
-        ]
+        ],
       }
       api_post('/session/json', body: body)
     when :present
       method = if cached_instance[:ensure] == :absent
                  # if the user was absent, we need to add
-                 "user_add/1"
+                 'user_add/1'
                else
                  # if the user was present then we need to modify
-                 "user_mod/1"
+                 'user_mod/1'
                end
       body = {
-        "id" => 0,
-        "method" => method,
-        "params" => [
+        'id' => 0,
+        'method' => method,
+        'params' => [
           # args (positional arguments)
-          [
-            resource[:name]
-          ],
+          [resource[:name]],
           # options (CLI flags / options)
           {
-            "givenname" => resource[:first_name],
-            "sn" => resource[:last_name],
+            'givenname' => resource[:first_name],
+            'sn' => resource[:last_name],
           },
-        ]
+        ],
       }
 
       # the user doesn't exist exist. only set the password on add/create
       if cached_instance[:ensure] == :absent
-        body["params"][1]["userpassword"] = resource[:password]
+        body['params'][1]['userpassword'] = resource[:password]
       end
-      
-      body["params"][1]["ipasshpubkey"] = resource[:sshpubkeys] if resource[:sshpubkeys]
+
+      body['params'][1]['ipasshpubkey'] = resource[:sshpubkeys] if resource[:sshpubkeys]
       api_post('/session/json', body: body)
     end
   end

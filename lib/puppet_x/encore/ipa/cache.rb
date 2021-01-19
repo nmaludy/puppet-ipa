@@ -1,17 +1,18 @@
 require 'puppet_x'
 require 'singleton'
 
-module PuppetX
-  module Encore
-    module Ipa
-      class Cache
-        include Singleton
-        attr_accessor :cached_clients
+# Encore module
+module PuppetX::Encore
+end
 
-        def initialize
-          @cached_clients = {}
-        end
-      end
+module PuppetX::Encore::Ipa
+  # Class for caching HTTP clients
+  class Cache
+    include Singleton
+    attr_accessor :cached_clients
+
+    def initialize
+      @cached_clients = {}
     end
   end
 end

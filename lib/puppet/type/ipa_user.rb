@@ -51,7 +51,7 @@ Puppet::Type.newtype(:ipa_user) do
       end
     end
   end
-  
+
   newproperty(:last_name) do
     desc 'Last name for the user'
 

@@ -119,7 +119,7 @@ class Puppet::Provider::Ipa < Puppet::Provider
     client_id = resource[:api_url] + resource[:api_username]
     client = PuppetX::Encore::Ipa::Cache.instance.cached_clients[client_id]
     if client.nil?
-      client = PuppetX::Encore::Ipa::HTTPClient.new(headers: {"Referer" => api_make_url('')})
+      client = PuppetX::Encore::Ipa::HTTPClient.new(headers: { 'Referer' => api_make_url('') })
       api_login(client: client)
       # only save client to cache upon successful login
       PuppetX::Encore::Ipa::Cache.instance.cached_clients[client_id] = client
@@ -137,12 +137,12 @@ class Puppet::Provider::Ipa < Puppet::Provider
                 client: api_client)
     # https://access.redhat.com/articles/2728021#end-point-pwd
     headers = {
-      "Content-Type" => "application/x-www-form-urlencoded",
-      "Accept" => "text/plain",
+      'Content-Type' => 'application/x-www-form-urlencoded',
+      'Accept' => 'text/plain',
     }
     form = {
-      "user" => username,
-      "password" => password,
+      'user' => username,
+      'password' => password,
     }
     response = client.post(api_make_url('/session/login_password'),
                            form: form,
@@ -151,7 +151,7 @@ class Puppet::Provider::Ipa < Puppet::Provider
     # is plain text and not JSON
     if persist_auth
       cookies = response.get_fields('Set-Cookie')
-      client.update_headers({'Cookie' => cookies.join('; ')})
+      client.update_headers('Cookie' => cookies.join('; '))
     end
     response
   end
@@ -163,7 +163,7 @@ class Puppet::Provider::Ipa < Puppet::Provider
 
     raise Puppet::Error, "Received API error from IPA: #{error}"
   end
-  
+
   def api_post(endpoint, body: nil, json_parse: true)
     response = api_client.post(api_make_url(endpoint), body: body)
     api_response_raise_if_error(response)

@@ -112,6 +112,7 @@ define ipa::user (
         owner   => $name,
         group   => $name,
         source  => $file_path,
+        mode    => undef,
         replace => false,
         require => Ipa_user[$name],
       }
