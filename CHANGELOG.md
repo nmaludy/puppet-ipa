@@ -2,6 +2,9 @@
 
 ## Development
 
+* Added new resources `ipa::user` and `ipa_user` to manage IPA users and their home directories.
+  Contributed by Nick Maludy (@nmaludy)
+
 ## v0.1.1 (2021-01-15)
 * Fixed bug in client install where /etc/nsswitch.conf was declared twice for file_line
   Contributed by Nick Maludy (@nmaludy)
