@@ -93,7 +93,7 @@ Puppet::Type.type(:ipa_user).provide(:default, parent: Puppet::Provider::Ipa) do
 
       # the user doesn't exist exist. only set the password on add/create
       if cached_instance[:ensure] == :absent
-        body['params'][1]['userpassword'] = resource[:password]
+        body['params'][1]['userpassword'] = resource[:initial_password]
       end
 
       body['params'][1]['ipasshpubkey'] = resource[:sshpubkeys] if resource[:sshpubkeys]

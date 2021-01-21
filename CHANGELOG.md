@@ -2,6 +2,10 @@
 
 ## Development
 
+## v0.2.1 (2021-01-21)
+* Fixed bug with `initial_password` in `ipa_user`.
+  Contributed by Nick Maludy (@nmaludy)
+
 ## v0.2.0 (2021-01-21)
 * Added new resources `ipa::user` and `ipa_user` to manage IPA users and their home directories.
   Contributed by Nick Maludy (@nmaludy)
