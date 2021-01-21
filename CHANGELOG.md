@@ -4,6 +4,11 @@
 
 * Added new resources `ipa::user` and `ipa_user` to manage IPA users and their home directories.
   Contributed by Nick Maludy (@nmaludy)
+  
+* Fixed bug in `ipa_kinit` where exired kerberos tickets weren't getting filtered out
+  resulting in `ipa_kinit` thinking a valid ticket existed for a user since it was in
+  the list.
+  Contributed by Nick Maludy (@nmaludy)
 
 ## v0.1.1 (2021-01-15)
 * Fixed bug in client install where /etc/nsswitch.conf was declared twice for file_line
