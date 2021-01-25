@@ -119,7 +119,8 @@ class Puppet::Provider::Ipa < Puppet::Provider
     client_id = resource[:api_url] + resource[:api_username]
     client = PuppetX::Encore::Ipa::Cache.instance.cached_clients[client_id]
     if client.nil?
-      client = PuppetX::Encore::Ipa::HTTPClient.new(headers: { 'Referer' => api_make_url('') })
+      client = PuppetX::Encore::Ipa::HTTPClient.new(headers: { 'Referer' => api_make_url(''),
+                                                               'Content-Type' => 'application/json' })
       api_login(client: client)
       # only save client to cache upon successful login
       PuppetX::Encore::Ipa::Cache.instance.cached_clients[client_id] = client
