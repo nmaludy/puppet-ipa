@@ -74,6 +74,8 @@ define ipa::user (
   String $ensure                      = 'present',
   String $first_name                  = $name,
   String $last_name                   = $name,
+  Optional[String] $mail              = undef,
+  Optional[Hash] $ldap_attributes     = undef,
   Boolean $manage_home_dir            = true,
   String $home_dir_base               = '',
   String $home_dir_mode               = '0700',
@@ -89,6 +91,8 @@ define ipa::user (
     first_name       => $first_name,
     last_name        => $last_name,
     sshpubkeys       => $sshpubkeys,
+    mail             => $mail,
+    ldap_attributes  => $ldap_attributes,
     api_username     => $ipa::admin_user,
     api_password     => $ipa::admin_password,
   }

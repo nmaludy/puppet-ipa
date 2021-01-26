@@ -31,6 +31,7 @@ Puppet::Type.type(:ipa_user).provide(:default, parent: Puppet::Provider::Ipa) do
     response_body = api_post('/session/json', body: body, json_parse: true)
     user_list = response_body['result']['result']
     user = user_list.find { |u| u['uid'][0] == resource[:name] }
+    Puppet.debug("Got user: #{user}")
 
     instance = nil
     if user.nil?
@@ -38,11 +39,21 @@ Puppet::Type.type(:ipa_user).provide(:default, parent: Puppet::Provider::Ipa) do
     else
       instance = {
         ensure: :present,
-        name: user['uid'][0],
-        first_name: user['givenname'][0],
-        last_name: user['sn'][0], # surname
+        name: get_ldap_attribute(user, 'uid'),
+        first_name: get_ldap_attribute(user, 'givenname'),
+        last_name: get_ldap_attribute(user, 'sn'), # surname
       }
-      instance[:sshpubkeys] = user['ipasshpubkey'] if user['ipasshpubkey']
+      instance[:sshpubkeys] = get_ldap_attribute(user, 'ipasshpubkey') if user['ipasshpubkey']
+      instance[:mail] = get_ldap_attribute(user, 'mail') if user['mail']
+
+      # fill out additional LDAP attributes that the user is asking to sync
+      if resource[:ldap_attributes]
+        instance[:ldap_attributes] = {}
+        resource[:ldap_attributes].each do |attr_key, _attr_value|
+          next if user[attr_key].nil?
+          instance[:ldap_attributes][attr_key] = get_ldap_attribute(user, attr_key)
+        end
+      end
     end
     Puppet.debug("Returning user instance: #{instance}")
     instance
@@ -97,7 +108,26 @@ Puppet::Type.type(:ipa_user).provide(:default, parent: Puppet::Provider::Ipa) do
       end
 
       body['params'][1]['ipasshpubkey'] = resource[:sshpubkeys] if resource[:sshpubkeys]
+      body['params'][1]['mail'] = resource[:mail] if resource[:mail]
+
+      # fill out additional LDAP attributes that the user is asking to sync
+      if resource[:ldap_attributes]
+        resource[:ldap_attributes].each do |attr_key, attr_value|
+          body['params'][1][attr_key] = attr_value
+        end
+      end
+
       api_post('/session/json', body: body)
+    end
+  end
+
+  def get_ldap_attribute(obj, attr)
+    if obj[attr].empty?
+      []
+    elsif obj[attr].size == 1
+      obj[attr][0]
+    else
+      obj[attr]
     end
   end
 end

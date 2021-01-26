@@ -33,13 +33,13 @@ Puppet::Type.newtype(:ipa_user) do
 
     validate do |value|
       unless value.is_a?(String)
-        raise ArgumentError, "password is expected to be an String, given: #{value.class.name}"
+        raise ArgumentError, "initial_password is expected to be an String, given: #{value.class.name}"
       end
     end
   end
 
   newproperty(:first_name) do
-    desc 'First name for the user'
+    desc 'First name for the user. This will be the "givenname" LDAP parameter.'
 
     defaultto do
       @resource[:name]
@@ -47,13 +47,13 @@ Puppet::Type.newtype(:ipa_user) do
 
     validate do |value|
       unless value.is_a?(String)
-        raise ArgumentError, "first is expected to be an String, given: #{value.class.name}"
+        raise ArgumentError, "first_name is expected to be an String, given: #{value.class.name}"
       end
     end
   end
 
   newproperty(:last_name) do
-    desc 'Last name for the user'
+    desc 'Last name for the user. This will be the "sn" LDAP parameter.'
 
     defaultto do
       @resource[:name]
@@ -61,7 +61,7 @@ Puppet::Type.newtype(:ipa_user) do
 
     validate do |value|
       unless value.is_a?(String)
-        raise ArgumentError, "first is expected to be an String, given: #{value.class.name}"
+        raise ArgumentError, "last_name is expected to be an String, given: #{value.class.name}"
       end
     end
   end
@@ -94,6 +94,31 @@ Puppet::Type.newtype(:ipa_user) do
 
     def insync?(is)
       sort_array(is) == should
+    end
+  end
+
+  newproperty(:mail) do
+    desc 'Email address of the user'
+
+    validate do |value|
+      unless value.is_a?(String)
+        raise ArgumentError, "mail is expected to be an String, given: #{value.class.name}"
+      end
+    end
+  end
+
+  newproperty(:ldap_attributes) do
+    desc 'Hash of additional IPA attributes to set on the user'
+
+    validate do |value|
+      unless value.is_a?(Hash)
+        raise ArgumentError, "ldap_attributes is expected to be a Hash, given: #{value.class.name}"
+      end
+    end
+
+    munge do |value|
+      # the IPA API downcases all keys, so we do the same to make sure the attributes match
+      value.transform_keys(&:downcase)
     end
   end
 
