@@ -64,6 +64,14 @@
 #     ]
 #   }
 #
+# @example Adding a user to groups, this auto-creates ipa::group_membership instances
+#   ipa::user { 'testuser':
+#     ensure           => present,
+#     initial_password => 'abc123',
+#     home_dir_base    => '/srv/nfs/home',
+#     groups           =>
+#   }
+#
 # @example Deleting a user
 #   ipa::user { 'testuser':
 #     ensure           => absent,
@@ -82,11 +90,13 @@ define ipa::user (
   Boolean $manage_etc_skel            = true,
   Boolean $manage_dot_ssh             = true,
   Optional[Array[String]] $sshpubkeys = undef,
+  Optional[Array[String]] $groups     = undef,
   String $api_username                = $ipa::admin_user,
   String $api_password                = $ipa::admin_password,
 ) {
-  ipa_user { $name:
+  ipa_user { $title:
     ensure           => $ensure,
+    name             => $name,
     initial_password => $initial_password,
     first_name       => $first_name,
     last_name        => $last_name,
@@ -131,6 +141,19 @@ define ipa::user (
       group   => $name,
       mode    => '0700',
       require => Ipa_user[$name],
+    }
+  }
+
+  # create group memberships for this user
+  if $groups {
+    $groups.each |$grp| {
+      ipa::group_membership { "${grp}:${title}":
+        ensure       => $ensure,
+        group        => $grp,
+        users        => [$name],
+        api_username => $api_username,
+        api_password => $api_password,
+      }
     }
   }
 }

@@ -1,4 +1,4 @@
-require File.expand_path(File.join(File.dirname(__FILE__), '..', 'ipa'))
+require 'puppet/provider/ipa'
 
 Puppet::Type.type(:ipa_kinit).provide(:default, parent: Puppet::Provider::Ipa) do
   defaultfor kernel: 'Linux'

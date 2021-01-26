@@ -1,3 +1,5 @@
+require 'puppet_x/encore/ipa/type_utils'
+
 Puppet::Type.newtype(:ipa_kinit) do
   desc 'Ensures a kereberos ticket is obtained for a given user'
 
@@ -18,9 +20,7 @@ Puppet::Type.newtype(:ipa_kinit) do
     desc 'Username to obtain a kerberose ticket for'
 
     validate do |value|
-      unless value.is_a?(String)
-        raise ArgumentError, "name is expected to be an String, given: #{value.class.name}"
-      end
+      PuppetX::Encore::Ipa::TypeUtils.validate_string(name, value)
     end
   end
 
@@ -28,9 +28,7 @@ Puppet::Type.newtype(:ipa_kinit) do
     desc 'Optional realm to help with user matching when running klist.'
 
     validate do |value|
-      unless value.is_a?(String)
-        raise ArgumentError, "api_password is expected to be an String, given: #{value.class.name}"
-      end
+      PuppetX::Encore::Ipa::TypeUtils.validate_string(name, value)
     end
 
     munge do |value|
@@ -46,9 +44,11 @@ Puppet::Type.newtype(:ipa_kinit) do
     sensitive true
 
     validate do |value|
-      unless value.is_a?(String)
-        raise ArgumentError, "api_password is expected to be an String, given: #{value.class.name}"
-      end
+      PuppetX::Encore::Ipa::TypeUtils.validate_string(name, value)
     end
+  end
+
+  validate do
+    PuppetX::Encore::Ipa::TypeUtils.validate_required_attributes(self)
   end
 end

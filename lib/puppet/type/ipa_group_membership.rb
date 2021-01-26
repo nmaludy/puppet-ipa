@@ -1,8 +1,8 @@
 require 'puppet_x/encore/ipa/list_property'
 require 'puppet_x/encore/ipa/type_utils'
 
-Puppet::Type.newtype(:ipa_user) do
-  desc 'Manages a user in IPA'
+Puppet::Type.newtype(:ipa_group_membership) do
+  desc 'Manages a membership of a group. Group membership can be user->group, group->group, external->group (TODO), idoverride->group (TODO), service->group.'
 
   ensurable do
     newvalue(:present) do
@@ -18,27 +18,19 @@ Puppet::Type.newtype(:ipa_user) do
 
   # namevar is always a parameter
   newparam(:name, namevar: true) do
-    desc 'Username of the user'
+    desc <<-EOS
+      Unique name of the membership, by default we use this for the group name
+      We support this NOT being the group name in case you want to manage membership
+      in a unique way.
+    EOS
 
     validate do |value|
       PuppetX::Encore::Ipa::TypeUtils.validate_string(name, value)
     end
   end
 
-  newparam(:initial_password) do
-    desc 'Initial password for the user. This is only used when creating the user and not managed going forward'
-
-    isrequired
-
-    sensitive true
-
-    validate do |value|
-      PuppetX::Encore::Ipa::TypeUtils.validate_string(name, value)
-    end
-  end
-
-  newproperty(:first_name) do
-    desc 'First name for the user. This will be the "givenname" LDAP parameter.'
+  newproperty(:group) do
+    desc 'Name of the group who members will be managed'
 
     defaultto do
       @resource[:name]
@@ -49,58 +41,38 @@ Puppet::Type.newtype(:ipa_user) do
     end
   end
 
-  newproperty(:last_name) do
-    desc 'Last name for the user. This will be the "sn" LDAP parameter.'
-
-    defaultto do
-      @resource[:name]
-    end
-
-    validate do |value|
-      PuppetX::Encore::Ipa::TypeUtils.validate_string(name, value)
-    end
-  end
-
-  newproperty(:sshpubkeys, array_matching: :all, parent: PuppetX::Encore::Ipa::ListProperty) do
-    validate do |value|
-      # note: Puppet automatically detects if the value is an array and calls this validate()
-      #       on each item/value within the array
-      PuppetX::Encore::Ipa::TypeUtils.validate_string(name, value)
-    end
-
-    def membership
-      :sshpubkey_membership
-    end
-  end
-
-  newparam(:sshpubkey_membership) do
-    desc "Whether specified SSH public keys should be considered the **complete list**
-        (`inclusive`) or the **minimum list** (`minimum`) of roles the user
-        has."
+  newparam(:membership) do
+    desc <<-EOS
+      Whether specified members should be considered the **complete list**
+      (`inclusive`) or the **minimum list** (`minimum`) of members the group has.
+    EOS
 
     newvalues(:inclusive, :minimum)
 
     defaultto :minimum
   end
 
-  newproperty(:mail) do
-    desc 'Email address of the user'
+  newproperty(:groups, array_patching: :all, parent: PuppetX::Encore::Ipa::ListProperty) do
+    desc 'Group members of this group'
 
     validate do |value|
       PuppetX::Encore::Ipa::TypeUtils.validate_string(name, value)
     end
   end
 
-  newproperty(:ldap_attributes) do
-    desc 'Hash of additional IPA attributes to set on the user'
+  newproperty(:users, array_patching: :all, parent: PuppetX::Encore::Ipa::ListProperty) do
+    desc 'User members of this group'
 
     validate do |value|
-      PuppetX::Encore::Ipa::TypeUtils.validate_type(name, value, Hash)
+      PuppetX::Encore::Ipa::TypeUtils.validate_string(name, value)
     end
+  end
 
-    munge do |value|
-      # the IPA API downcases all keys, so we do the same to make sure the attributes match
-      value.transform_keys(&:downcase)
+  newproperty(:services, array_patching: :all, parent: PuppetX::Encore::Ipa::ListProperty) do
+    desc 'Service members of this group'
+
+    validate do |value|
+      PuppetX::Encore::Ipa::TypeUtils.validate_string(name, value)
     end
   end
 
@@ -142,5 +114,14 @@ Puppet::Type.newtype(:ipa_user) do
 
   validate do
     PuppetX::Encore::Ipa::TypeUtils.validate_required_attributes(self)
+  end
+
+  autorequire(:ipa_group) do
+    grp = [@parameters[:group].should]
+    grp += @parameters[:groups].should if @parameters[:groups] && @parameters[:groups].should
+  end
+
+  autorequire(:ipa_user) do
+    @parameters[:users].nil? ? [] : @parameters[:users].should
   end
 end
