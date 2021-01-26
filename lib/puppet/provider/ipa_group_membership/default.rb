@@ -13,8 +13,8 @@ Puppet::Type.type(:ipa_group_membership).provide(:default, parent: Puppet::Provi
 
   # In this case we need to be pretty different about how we handle group memberships
   # because they are special, so we aren't using a cache here
-  def read_instance(use_cache: true)
-    # TODO read from a "groups cache"
+  def read_instance(*)
+    # TODO: read from a "groups cache"
     body = {
       'id' => 0,
       'method' => 'group_find/1',
@@ -45,10 +45,10 @@ Puppet::Type.type(:ipa_group_membership).provide(:default, parent: Puppet::Provi
 
       # if we are trying to delete the instance and all of the memberships are gone, then tell
       # Puppet that its gone
-      if (resource[:ensure] == :absent &&
-          (instance[:groups].nil? || instance[:groups] == :absent) &&
-          (instance[:users].nil? || instance[:users] == :absent) &&
-          (instance[:services].nil? || instance[:services] == :absent))
+      if resource[:ensure] == :absent &&
+         (instance[:groups].nil? || instance[:groups] == :absent) &&
+         (instance[:users].nil? || instance[:users] == :absent) &&
+         (instance[:services].nil? || instance[:services] == :absent)
         instance = nil
       end
     end
@@ -56,7 +56,6 @@ Puppet::Type.type(:ipa_group_membership).provide(:default, parent: Puppet::Provi
     Puppet.debug("Returning group membership instance #{instance}")
     instance
   end
-
 
   # this method should check resource[:ensure]
   #  if it is :present this method should create/update the instance using the values
@@ -74,6 +73,7 @@ Puppet::Type.type(:ipa_group_membership).provide(:default, parent: Puppet::Provi
              else
                'group_add_member/1'
              end
+
     body = {
       'id' => 0,
       'method' => method,

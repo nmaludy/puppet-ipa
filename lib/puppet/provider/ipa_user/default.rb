@@ -62,7 +62,7 @@ Puppet::Type.type(:ipa_user).provide(:default, parent: Puppet::Provider::Ipa) do
       # special handling for custom ldap attributes
       if resource[:ldap_attributes]
         # only keep the LDAP attributes in the instance that are specified on the resource
-        instance[:ldap_attributes].select! do |attr_key, attr_value|
+        instance[:ldap_attributes].select! do |attr_key, _attr_value|
           resource[:ldap_attributes].key?(attr_key)
         end
       else

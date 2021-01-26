@@ -4,12 +4,10 @@ require 'singleton'
 # Encore module
 module PuppetX::Encore::Ipa::TypeUtils
   def validate_type(attr, value, type)
-    unless value.is_a?(type)
-      raise ArgumentError, "#{attr} is expected to be an #{type.name}, given: #{value.class.name}"
-    end
+    raise ArgumentError, "#{attr} is expected to be an #{type.name}, given: #{value.class.name}" unless value.is_a?(type)
   end
   module_function :validate_type
-  
+
   def validate_string(attr, value)
     validate_type(attr, value, String)
   end

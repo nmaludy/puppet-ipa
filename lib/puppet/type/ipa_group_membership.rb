@@ -119,6 +119,7 @@ Puppet::Type.newtype(:ipa_group_membership) do
   autorequire(:ipa_group) do
     grp = [@parameters[:group].should]
     grp += @parameters[:groups].should if @parameters[:groups] && @parameters[:groups].should
+    grp
   end
 
   autorequire(:ipa_user) do

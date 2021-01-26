@@ -52,7 +52,7 @@ Puppet::Type.newtype(:ipa_group) do
     validate do |value|
       PuppetX::Encore::Ipa::TypeUtils.validate_type(name, value, Integer)
       unless @resource[:group_type] == :posix
-        raise ArgumentError, "gid is only allowed to be specified when creating POSIX groups."
+        raise ArgumentError, 'gid is only allowed to be specified when creating POSIX groups.'
       end
     end
   end

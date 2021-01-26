@@ -1,8 +1,8 @@
 require 'puppet_x'
 
-module PuppetX
-  module Encore
-    module Ipa
-    end
-  end
+# module for encore
+module PuppetX::Encore
+end
+# module for ipa
+module PuppetX::Encore::Ipa
 end

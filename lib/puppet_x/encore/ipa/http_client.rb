@@ -4,7 +4,6 @@ require 'json'
 require 'puppet_x/encore/ipa'
 require 'puppet'
 
-
 module PuppetX::Encore::Ipa
   # Client class for HTTP calls
   class HTTPClient
