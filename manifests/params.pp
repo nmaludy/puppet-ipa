@@ -142,7 +142,10 @@ class ipa::params {
   #   https://en.wikipedia.org/wiki/User_identifier#Reserved_ranges
   $uid_gid_min = 65536
   # allows for the fact to be empty/undef
-  $uid_gid_max = max(pick(dig($facts, 'ipa_login_defs', 'UID_MAX'), $uid_gid_min),
-                      pick(dig($facts, 'ipa_login_defs', 'GID_MAX'), $uid_gid_min))
+  $uid_gid_max = $facts['ipa_login_defs'] ? {
+    Hash    => max(pick($facts['ipa_login_defs']['UID_MAX'], $uid_gid_min),
+                    pick($facts['ipa_login_defs']['UID_MAX'], $uid_gid_min)),
+    default => $uid_gid_min,
+  }
   $idstart = (fqdn_rand('10737') + max($uid_gid_max, $uid_gid_min))
 }
