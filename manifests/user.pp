@@ -118,6 +118,7 @@ define ipa::user (
       owner   => $name,
       group   => $name,
       mode    => $home_dir_mode,
+      force   => true,
       require => Ipa_user[$name],
     }
   }
@@ -144,6 +145,7 @@ define ipa::user (
       owner   => $name,
       group   => $name,
       mode    => '0700',
+      force   => true,
       require => Ipa_user[$name],
     }
   }
