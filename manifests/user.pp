@@ -107,10 +107,14 @@ define ipa::user (
     api_password     => $ipa::admin_password,
   }
 
+  $_file_ensure = $ensure ? {
+    'absent' => 'absent',
+    default  => undef,
+  }
   if $manage_home_dir {
     $_home_dir = "${home_dir_base}/${name}"
     file { $_home_dir:
-      ensure  => directory,
+      ensure  => pick($_file_ensure, 'directory'),
       owner   => $name,
       group   => $name,
       mode    => $home_dir_mode,
@@ -122,7 +126,7 @@ define ipa::user (
   if $manage_etc_skel {
     $facts['ipa_etc_skel_files'].each |$file_path, $file_props| {
       file { "${_home_dir}/${file_props['local_path']}":
-        ensure  => $file_props['ensure'],
+        ensure  => pick($_file_ensure, $file_props['ensure']),
         owner   => $name,
         group   => $name,
         source  => $file_path,
@@ -136,7 +140,7 @@ define ipa::user (
   # create user's ~/.ssh directory and set proper permissions
   if $manage_dot_ssh {
     file { "${_home_dir}/.ssh":
-      ensure  => directory,
+      ensure  => pick($_file_ensure, 'directory'),
       owner   => $name,
       group   => $name,
       mode    => '0700',
