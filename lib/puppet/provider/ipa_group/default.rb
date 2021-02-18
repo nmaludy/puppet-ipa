@@ -3,8 +3,6 @@ require 'puppet/provider/ipa'
 Puppet::Type.type(:ipa_group).provide(:default, parent: Puppet::Provider::Ipa) do
   defaultfor kernel: 'Linux'
 
-  commands ipa: 'ipa'
-
   # always need to define this in our implementation classes
   mk_resource_methods
 

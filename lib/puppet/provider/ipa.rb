@@ -212,4 +212,10 @@ class Puppet::Provider::Ipa < Puppet::Provider
     # either return the full array if >1 element, or return the non-array value
     obj[attr]
   end
+
+  def get_ldap_attribute_boolean(obj, attr)
+    # values can be: "TRUE", "True", or "true"
+    # casecmp does case insensitive comparison and returns 0 if equal
+    get_ldap_attribute(obj, attr).casecmp('true') == 0
+  end
 end
