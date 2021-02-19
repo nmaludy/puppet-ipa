@@ -12,6 +12,7 @@
   String $ad_site = '',
   String $ad_ldap_search_base = '',
   Optional[String] $override_homedir = undef,
+  Hash[String, Hash[String, Any]] $config_entries = {},
 |-%>
 [domain/<%= $domain %>]
 debug_level = <%= $sssd_debug_level %>
@@ -42,6 +43,9 @@ subdomain_inherit = ldap_user_principal, ignore_group_members
 subdomain_inherit = ldap_user_principal
 <% } -%>
 ldap_user_principal = nosuchattr
+<% pick($config_entries["domain/$domain"], {}).each |$cfg_key, $cfg_value| { -%>
+<%= $cfg_key %> = <%= $cfg_value %>
+<% } -%>
 
 <% if $ad_domain != '' { -%>
 [domain/<%= $domain -%>/<%= $ad_domain %>]
@@ -51,12 +55,18 @@ ad_site = <%= $ad_site %>
   <%- if $ad_ldap_search_base != '' { -%>
 ldap_search_base = <%= $ad_ldap_search_base %>
   <%- } -%>
+<% pick($config_entries["domain/${domain}/${ad_domain}"], {}).each |$cfg_key, $cfg_value| { %>
+<%= $cfg_key %> = <%= $cfg_value %>
+<% } -%>
 
 <% } -%>
 [sssd]
 debug_level = <%= $sssd_debug_level %>
 services = <%= $sssd_services.join(',') %>
 domains = <%= $domain %>
+<% pick($config_entries["sssd"], {}).each |$cfg_key, $cfg_value| { %>
+<%= $cfg_key %> = <%= $cfg_value %>
+<% } -%>
 
 [nss]
 debug_level = <%= $sssd_debug_level %>
@@ -68,28 +78,55 @@ default_shell = /bin/bash
 <% if ($ipa_role == 'master') or ($ipa_role == 'replica') { -%>
 memcache_timeout = 300
 <% }-%>
+<% pick($config_entries["nss"], {}).each |$cfg_key, $cfg_value| { %>
+<%= $cfg_key %> = <%= $cfg_value %>
+<% } -%>
 
 [pam]
 debug_level = <%= $sssd_debug_level %>
+<% pick($config_entries["pam"], {}).each |$cfg_key, $cfg_value| { %>
+<%= $cfg_key %> = <%= $cfg_value %>
+<% } -%>
 
 [sudo]
 debug_level = <%= $sssd_debug_level %>
+<% pick($config_entries["sudo"], {}).each |$cfg_key, $cfg_value| { %>
+<%= $cfg_key %> = <%= $cfg_value %>
+<% } -%>
 
 [autofs]
 debug_level = <%= $sssd_debug_level %>
+<% pick($config_entries["autofs"], {}).each |$cfg_key, $cfg_value| { %>
+<%= $cfg_key %> = <%= $cfg_value %>
+<% } -%>
 
 [ssh]
 debug_level = <%= $sssd_debug_level %>
+<% pick($config_entries["ssh"], {}).each |$cfg_key, $cfg_value| { %>
+<%= $cfg_key %> = <%= $cfg_value %>
+<% } -%>
 
 [pac]
 debug_level = <%= $sssd_debug_level %>
+<% pick($config_entries["pac"], {}).each |$cfg_key, $cfg_value| { %>
+<%= $cfg_key %> = <%= $cfg_value %>
+<% } -%>
 
 [ifp]
 debug_level = <%= $sssd_debug_level %>
+<% pick($config_entries["ipf"], {}).each |$cfg_key, $cfg_value| { %>
+<%= $cfg_key %> = <%= $cfg_value %>
+<% } -%>
 <% if ($ipa_role == 'master') or ($ipa_role == 'replica') { -%>
 
 [secrets]
 debug_level = <%= $sssd_debug_level %>
+<% pick($config_entries["secrets"], {}).each |$cfg_key, $cfg_value| { %>
+<%= $cfg_key %> = <%= $cfg_value %>
+<% } -%>
 
 [session_recording]
+<% pick($config_entries["session_recording"], {}).each |$cfg_key, $cfg_value| { %>
+<%= $cfg_key %> = <%= $cfg_value %>
+<% } -%>
 <% } -%>

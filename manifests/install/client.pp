@@ -23,6 +23,7 @@ class ipa::install::client (
   String            $sssd_debug_level     = $ipa::sssd_debug_level,
   String            $sssd_package_name    = $ipa::params::sssd_package_name,
   Array[String]     $sssd_services        = $ipa::sssd_services,
+  Hash[String, Hash[String, Any]] $sssd_config_entries = $ipa::sssd_config_entries,
 ) inherits ipa {
   package{ 'ipa-client':
     ensure => $client_ensure,
@@ -90,6 +91,7 @@ class ipa::install::client (
       override_homedir     => $override_homedir,
       sssd_debug_level     => $sssd_debug_level,
       sssd_services        => $sssd_services,
+      config_entries       => $sssd_config_entries,
     }),
     mode    => '0600',
     require => [
