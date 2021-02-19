@@ -214,6 +214,7 @@ class ipa (
   String               $ipa_master_fqdn          = '',
   String               $ipa_role                 = 'client',
   String               $ipa_server_fqdn          = $facts['fqdn'],
+  String               $keytab_default           = $ipa::params::keytab_default,
   Boolean              $manage_host_entry        = true,
   Boolean              $manage                   = true,
   Boolean              $mkhomedir                = false,

@@ -10,6 +10,7 @@ class ipa::params {
 
   $autofs_service = 'autofs'
   $sssd_service   = 'sssd'
+  $keytab_default = '/etc/krb5.keytab'
 
   $ds_ssl_min_version_tls12 = 'TLS1.2'
   $ds_ssl_ciphers_tls12 = [
