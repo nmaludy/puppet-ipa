@@ -123,6 +123,6 @@ Puppet::Type.newtype(:ipa_group_membership) do
   end
 
   autorequire(:ipa_user) do
-    @parameters[:users] ? @parameters[:users].should : []
+    (@parameters[:users]) ? @parameters[:users].should : []
   end
 end
