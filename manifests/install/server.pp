@@ -105,7 +105,7 @@ class ipa::install::server (
   }
 
   # This will set the SSL protocols to use.
-  if !defined(Service[ 'httpd']) {
+  if !defined(Service['httpd']) {
     service { 'httpd':
       ensure => running,
       enable => true,
