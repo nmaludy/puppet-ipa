@@ -56,7 +56,7 @@ class ipa::install::server::replica (
     path        => ['/bin', '/sbin', '/usr/bin', '/usr/sbin'],
     timeout     => 0,
     # only attempt to reinstall if IPA is not configured
-    onlyif      => '/usr/sbin/ipactl status | grep -i "IPA is not configured"',
+    onlyif      => 'ipactl status 2>&1 | grep -i "IPA is not configured"',
     logoutput   => 'on_failure',
     require     => Class['ipa::helpers::firewalld'],
     notify      => Ipa::Helpers::Flushcache["server_${$facts['fqdn']}"],
