@@ -5,6 +5,8 @@ define ipa::keytab (
   Optional[String] $server = undef,
   Optional[String] $username = undef,
   Optional[String] $password = undef,
+  # default is retrieve, otherwise keytab will overwrite everyone else
+  Enum['retrieve', 'create'] $action = 'retrieve',
   Boolean $file_manage       = true,
   String  $owner             = 'root',
   String  $group             = 'root',
@@ -25,8 +27,15 @@ define ipa::keytab (
   $_ldap_domain = $ipa::domain.split(/\./).map |$item| { "dc=${item}" }.join(',')
   $_username_dn = "uid=${_username},cn=users,cn=accounts,${_ldap_domain}"
 
+  case $action {
+    # when retrieving keytab, need to pass in -r
+    'retrieve': { $action_args = '-r' }
+    'create': { $action_args = '' }
+    default: { $action_args = '' }
+  }
+
   exec { "ipa-getkeytab -p ${principal} -k ${_file}":
-    command     => "ipa-getkeytab -s ${_server} -p ${principal} -k ${_file} -D ${_username_dn} -w \"\$IPA_PASSWORD\"",
+    command     => "ipa-getkeytab ${action_args} -s ${_server} -p ${principal} -k ${_file} -D ${_username_dn} -w \"\$IPA_PASSWORD\"",
     unless      => "klist -k ${_file} | grep -q '${principal}'",
     environment => [ "IPA_PASSWORD=${_password}" ],
     path        => ['/usr/bin', '/bin', '/usr/sbin', '/sbin'],
