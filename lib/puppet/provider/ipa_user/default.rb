@@ -36,11 +36,15 @@ Puppet::Type.type(:ipa_user).provide(:default, parent: Puppet::Provider::Ipa) do
       instance = {
         ensure: :present,
         name: get_ldap_attribute(user, 'uid'),
+        # negate lock = enabled, yes use a symbol here
+        enable: get_ldap_attribute_boolean(user, 'nsaccountlock') ? :false : :true,
         first_name: get_ldap_attribute(user, 'givenname'),
         last_name: get_ldap_attribute(user, 'sn'), # surname
       }
       instance[:sshpubkeys] = get_ldap_attribute(user, 'ipasshpubkey') if user['ipasshpubkey']
+      instance[:login_shell] = get_ldap_attribute(user, 'loginshell') if user['loginshell']
       instance[:mail] = get_ldap_attribute(user, 'mail') if user['mail']
+      instance[:job_title] = get_ldap_attribute(user, 'title') if user['title']
 
       # save all LDAP attributes and we'll filter later
       instance[:ldap_attributes] = {}
@@ -121,8 +125,13 @@ Puppet::Type.type(:ipa_user).provide(:default, parent: Puppet::Provider::Ipa) do
         body['params'][1]['userpassword'] = resource[:initial_password]
       end
 
+      # negate enable = lock
+      # yes, use a symbol here
+      body['params'][1]['nsaccountlock'] = resource[:enable] == :false unless resource[:enable].nil?
       body['params'][1]['ipasshpubkey'] = resource[:sshpubkeys] if resource[:sshpubkeys]
+      body['params'][1]['loginshell'] = resource[:login_shell] if resource[:login_shell]
       body['params'][1]['mail'] = resource[:mail] if resource[:mail]
+      body['params'][1]['title'] = resource[:job_title] if resource[:job_title]
 
       # fill out additional LDAP attributes that the user is asking to sync
       if resource[:ldap_attributes]

@@ -1,3 +1,5 @@
+require 'puppet/property/boolean'
+require 'puppet_x/encore/ipa/boolean_property'
 require 'puppet_x/encore/ipa/list_property'
 require 'puppet_x/encore/ipa/type_utils'
 
@@ -35,6 +37,12 @@ Puppet::Type.newtype(:ipa_user) do
     validate do |value|
       PuppetX::Encore::Ipa::TypeUtils.validate_string(name, value)
     end
+  end
+
+  newproperty(:enable, boolean: true, parent: PuppetX::Encore::Ipa::BooleanProperty) do
+    desc 'Account is enabled or not'
+
+    defaultto :true  # yes, use a symbol here
   end
 
   newproperty(:first_name) do
@@ -83,8 +91,24 @@ Puppet::Type.newtype(:ipa_user) do
     defaultto :minimum
   end
 
+  newproperty(:login_shell) do
+    desc 'Login shell for the user'
+
+    validate do |value|
+      PuppetX::Encore::Ipa::TypeUtils.validate_string(name, value)
+    end
+  end
+
   newproperty(:mail) do
     desc 'Email address of the user'
+
+    validate do |value|
+      PuppetX::Encore::Ipa::TypeUtils.validate_string(name, value)
+    end
+  end
+
+  newproperty(:job_title) do
+    desc 'Job title of the user'
 
     validate do |value|
       PuppetX::Encore::Ipa::TypeUtils.validate_string(name, value)

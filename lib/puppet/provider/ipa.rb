@@ -214,8 +214,19 @@ class Puppet::Provider::Ipa < Puppet::Provider
   end
 
   def get_ldap_attribute_boolean(obj, attr)
-    # values can be: "TRUE", "True", or "true"
-    # casecmp does case insensitive comparison and returns 0 if equal
-    get_ldap_attribute(obj, attr).casecmp('true').zero?
+    ldap_attr = get_ldap_attribute(obj, attr)
+    # FreeIPA is inconsistent
+    # sometimes values can be straight booleans
+    # sometimes they can be strings
+    case ldap_attr
+    when true, false  # yes, this is how you do it in Ruby because there is no Boolean type
+      return ldap_attr
+    when String
+      # values can be: "TRUE", "True", or "true"
+      # casecmp does case insensitive comparison and returns 0 if equal
+      return ldap_attr.casecmp('true').zero?
+    else
+      raise Puppet::Error, "Unable to convert LDAP Attribute #{attr} from #{ldap_attr.class.name} to Boolean"
+    end
   end
 end
