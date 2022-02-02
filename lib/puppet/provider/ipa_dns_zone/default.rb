@@ -43,9 +43,14 @@ Puppet::Type.type(:ipa_dns_zone).provide(:default, parent: Puppet::Provider::Ipa
       instance = {
         ensure: :present,
         name: get_ldap_attribute(dnszone, 'idnsname'),
-        allow_dynamic_update: get_ldap_attribute_boolean(dnszone, 'idnsallowdynupdate'),
-        allow_sync_ptr: get_ldap_attribute_boolean(dnszone, 'idnsallowsyncptr'),
       }
+      # optional properties
+      dynamic_update = get_ldap_attribute_boolean(dnszone, 'idnsallowdynupdate'),
+      instance[:allow_dynamic_update] = dynamic_update if dynamic_update != :absent
+
+      sync_ptr = get_ldap_attribute_boolean(dnszone, 'idnsallowsyncptr')
+      instance[:allow_sync_ptr] = sync_ptr if sync_ptr != :absent
+
       instance_hash[instance[:name]] = instance
     end
     Puppet.debug("Returning group instances: #{instance_hash}")
