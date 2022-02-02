@@ -219,6 +219,8 @@ class Puppet::Provider::Ipa < Puppet::Provider
     # sometimes values can be straight booleans
     # sometimes they can be strings
     case ldap_attr
+    when :absent
+      return nil
     when true, false  # yes, this is how you do it in Ruby because there is no Boolean type
       return ldap_attr
     when String
