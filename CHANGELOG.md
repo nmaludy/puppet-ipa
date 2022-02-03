@@ -2,6 +2,9 @@
 
 ## Development
 
+* Added ability to use Ubuntu 18.04 and 20.04
+  Contributed by Nick Maludy (@bishopbm1)
+
 * Added ability to specify `mail` and any additional `ldap_attributes` for IPA users.
   Contributed by Nick Maludy (@nmaludy)
 
