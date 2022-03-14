@@ -134,6 +134,7 @@ class ipa::params {
   $ipa_server_package_name  = 'ipa-server'
   $kstart_package_name      = 'kstart'
   $sssd_package_name        = 'sssd-common'
+  $sssd_ipa_package_name    = 'sssd-ipa'
   $sssdtools_package_name   = 'sssd-tools'
 
   # In order to avoid this error:

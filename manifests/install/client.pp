@@ -22,6 +22,7 @@ class ipa::install::client (
   String            $principal_user       = $ipa::final_domain_join_principal,
   String            $sssd_debug_level     = $ipa::sssd_debug_level,
   String            $sssd_package_name    = $ipa::params::sssd_package_name,
+  String            $sssd_ipa_package_name = $ipa::params::sssd_ipa_package_name,
   Array[String]     $sssd_services        = $ipa::sssd_services,
   Hash[String, Hash[String, Any]] $sssd_config_entries = $ipa::sssd_config_entries,
 ) inherits ipa {
@@ -96,6 +97,7 @@ class ipa::install::client (
     mode    => '0600',
     require => [
       Package[$sssd_package_name],
+      Package[$sssd_ipa_package_name],
       Exec["client_install_${$facts['fqdn']}"],
     ],
     notify  => Ipa::Helpers::Flushcache["server_${$facts['fqdn']}"],

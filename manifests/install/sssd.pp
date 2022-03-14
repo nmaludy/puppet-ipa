@@ -1,8 +1,9 @@
 #
 class ipa::install::sssd (
   String  $sssd_package_name = $ipa::params::sssd_package_name,
+  String  $sssd_ipa_package_name = $ipa::params::sssd_ipa_package_name,
 ) inherits ipa::params {
-  package { $sssd_package_name:
+  package { [$sssd_package_name, $sssd_ipa_package_name]:
     ensure => present,
   }
 
