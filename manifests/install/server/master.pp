@@ -73,7 +73,7 @@ class ipa::install::server::master (
   }
 
   facter::fact { 'ipa_installed':
-    value => true,
+    value => 'true',
   }
 
   # Updated master sssd.conf file after IPA is installed.
