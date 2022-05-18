@@ -1,6 +1,6 @@
 {
   "name": "encore-ipa",
-  "version": "0.2.1",
+  "version": "0.2.2",
   "author": "Encore Technologies",
   "summary": "Manages IPA servers and clients.",
   "license": "Apache-2.0",
@@ -42,6 +42,13 @@
       "operatingsystemrelease": [
         "7",
         "8"
+      ]
+    },
+    {
+      "operatingsystem": "Ubuntu",
+      "operatingsystemrelease": [
+        "18.04",
+        "20.04"
       ]
     }
   ],

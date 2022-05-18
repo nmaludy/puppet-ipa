@@ -117,6 +117,28 @@ class ipa::params {
           $pki_ssl_ciphers        = undef
           $pki_ssl_protocol_range = undef
         }
+        /(18.04)/: {
+          $service_stop_epp    = 'systemctl stop <%= $service %>'
+          $service_restart_epp = 'systemctl restart <%= $service %>'
+
+          $ds_ssl_ciphers         = undef
+          $ds_ssl_min_version     = undef
+          $nss_ssl_ciphers        = undef
+          $nss_ssl_protocols      = undef
+          $pki_ssl_ciphers        = undef
+          $pki_ssl_protocol_range = undef
+        }
+        /(20.04)/: {
+          $service_stop_epp    = 'systemctl stop <%= $service %>'
+          $service_restart_epp = 'systemctl restart <%= $service %>'
+
+          $ds_ssl_ciphers         = undef
+          $ds_ssl_min_version     = undef
+          $nss_ssl_ciphers        = undef
+          $nss_ssl_protocols      = undef
+          $pki_ssl_ciphers        = undef
+          $pki_ssl_protocol_range = undef
+        }
         default: { fail("ERROR: Unsupported Ubuntu version: ${facts['os']['full']}") }
       }
       $ldaputils_package_name    = 'ldap-utils'

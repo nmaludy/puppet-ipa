@@ -110,7 +110,7 @@ class ipa::install::client (
     ~> file_line { '/etc/nsswitch.conf_automount':
       path   => '/etc/nsswitch.conf',
       line   => 'automount:  files sss',
-      match  => '^automount: ',
+      match  => '^automount:.*',
       notify => Ipa::Helpers::Flushcache["server_${$facts['fqdn']}"],
     }
   }
@@ -119,7 +119,7 @@ class ipa::install::client (
   file_line { '/etc/nsswitch.conf_sudoers':
     path   => '/etc/nsswitch.conf',
     line   => 'sudoers:  files sss',
-    match  => '^sudoers: ',
+    match  => '^sudoers:.*',
     notify => Ipa::Helpers::Flushcache["server_${$facts['fqdn']}"],
   }
 
@@ -127,14 +127,14 @@ class ipa::install::client (
   file_line { 'krb5.conf_dns_realm':
     path    => '/etc/krb5.conf',
     line    => '  dns_lookup_realm = true',
-    match   => '^  dns_lookup_realm =',
+    match   => '^  dns_lookup_realm =.*',
     require => Exec["client_install_${$facts['fqdn']}"],
   }
 
   file_line { 'krb5.conf_dns_kdc':
     path    => '/etc/krb5.conf',
     line    => '  dns_lookup_kdc = true',
-    match   => '^  dns_lookup_kdc =',
+    match   => '^  dns_lookup_kdc =.*',
     require => Exec["client_install_${$facts['fqdn']}"],
   }
 }
