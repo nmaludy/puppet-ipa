@@ -63,7 +63,7 @@ class ipa::install::server::replica (
   }
 
   facter::fact { 'ipa_installed':
-    value => true,
+    value => 'true',
   }
 
 }
