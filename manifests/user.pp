@@ -64,6 +64,14 @@
 #     ]
 #   }
 #
+# @example Adding a user to groups, this auto-creates ipa::group_membership instances
+#   ipa::user { 'testuser':
+#     ensure           => present,
+#     initial_password => 'abc123',
+#     home_dir_base    => '/srv/nfs/home',
+#     groups           =>
+#   }
+#
 # @example Deleting a user
 #   ipa::user { 'testuser':
 #     ensure           => absent,
@@ -74,36 +82,50 @@ define ipa::user (
   String $ensure                      = 'present',
   String $first_name                  = $name,
   String $last_name                   = $name,
+  Boolean $enable                     = true,
+  Optional[String] $login_shell       = undef,
   Optional[String] $mail              = undef,
+  Optional[String] $job_title         = undef,
   Optional[Hash] $ldap_attributes     = undef,
   Boolean $manage_home_dir            = true,
   String $home_dir_base               = '',
   String $home_dir_mode               = '0700',
+  String $home_dir                    = "${home_dir_base}/${name}",
   Boolean $manage_etc_skel            = true,
   Boolean $manage_dot_ssh             = true,
   Optional[Array[String]] $sshpubkeys = undef,
+  Optional[Array[String]] $groups     = undef,
   String $api_username                = $ipa::admin_user,
   String $api_password                = $ipa::admin_password,
 ) {
-  ipa_user { $name:
+  ipa_user { $title:
     ensure           => $ensure,
+    enable           => $enable,
+    name             => $name,
     initial_password => $initial_password,
     first_name       => $first_name,
     last_name        => $last_name,
     sshpubkeys       => $sshpubkeys,
+    homedirectory    => $home_dir,
+    login_shell      => $login_shell,
     mail             => $mail,
+    job_title        => $job_title,
     ldap_attributes  => $ldap_attributes,
     api_username     => $ipa::admin_user,
     api_password     => $ipa::admin_password,
   }
 
+  $_file_ensure = $ensure ? {
+    'absent' => 'absent',
+    default  => undef,
+  }
   if $manage_home_dir {
-    $_home_dir = "${home_dir_base}/${name}"
     file { $_home_dir:
-      ensure  => directory,
+      ensure  => pick($_file_ensure, 'directory'),
       owner   => $name,
       group   => $name,
       mode    => $home_dir_mode,
+      force   => true,
       require => Ipa_user[$name],
     }
   }
@@ -112,7 +134,7 @@ define ipa::user (
   if $manage_etc_skel {
     $facts['ipa_etc_skel_files'].each |$file_path, $file_props| {
       file { "${_home_dir}/${file_props['local_path']}":
-        ensure  => $file_props['ensure'],
+        ensure  => pick($_file_ensure, $file_props['ensure']),
         owner   => $name,
         group   => $name,
         source  => $file_path,
@@ -126,11 +148,25 @@ define ipa::user (
   # create user's ~/.ssh directory and set proper permissions
   if $manage_dot_ssh {
     file { "${_home_dir}/.ssh":
-      ensure  => directory,
+      ensure  => pick($_file_ensure, 'directory'),
       owner   => $name,
       group   => $name,
       mode    => '0700',
+      force   => true,
       require => Ipa_user[$name],
+    }
+  }
+
+  # create group memberships for this user
+  if $groups {
+    $groups.each |$grp| {
+      ipa::group_membership { "${grp}:${title}":
+        ensure       => $ensure,
+        group        => $grp,
+        users        => [$name],
+        api_username => $api_username,
+        api_password => $api_password,
+      }
     }
   }
 }

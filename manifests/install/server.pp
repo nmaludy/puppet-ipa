@@ -105,9 +105,11 @@ class ipa::install::server (
   }
 
   # This will set the SSL protocols to use.
-  service { 'httpd':
-    ensure => running,
-    enable => true,
+  if !defined(Service['httpd']) {
+    service { 'httpd':
+      ensure => running,
+      enable => true,
+    }
   }
 
   # harden the SSL ciphers and protocols for Apache using the NSS module

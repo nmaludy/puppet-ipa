@@ -62,6 +62,7 @@ EOS
           provider: described_class.name,
           name: name,
           realm: 'EXPECTED.DOMAIN.TLD',
+          password: 'AdminPassword123',
         }
       end
 
@@ -98,6 +99,7 @@ EOS
           provider: described_class.name,
           name: name,
           ensure: :absent,
+          password: 'AdminPassword123',
         }
       end
 

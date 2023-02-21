@@ -1,7 +1,5 @@
-require File.expand_path(File.join(File.dirname(__FILE__), '..', '..',
-                                   'puppet_x', 'encore', 'ipa', 'http_client'))
-require File.expand_path(File.join(File.dirname(__FILE__), '..', '..',
-                                   'puppet_x', 'encore', 'ipa', 'cache'))
+require 'puppet_x/encore/ipa/cache'
+require 'puppet_x/encore/ipa/http_client'
 require 'cgi'
 
 # This class is a "base" provider to use to implement your own custom providers here
@@ -97,8 +95,24 @@ class Puppet::Provider::Ipa < Puppet::Provider
   # note: we explicitly do NOT cache within this method because we want to be
   #       able to call it both in initialize() and in flush() and return the current
   #       state of the resource from the API each time
-  def read_instance
-    raise NotImplementedError, 'read_instance needs to be implemented by child providers'
+  def read_instance(use_cache: true)
+    instances_hash = use_cache ? cached_all_instances : read_all_instances
+    if instances_hash.key?(resource[:name])
+      instances_hash[resource[:name]]
+    else
+      { ensure: :absent, name: resource[:name] }
+    end
+  end
+
+  # Read all instances of this type from the API, this will then be stored in a cache
+  # We do it like this so that the first resource of this type takes the burden of
+  # reading all of the data, but the following resources are all super fast because
+  # they can use the global cache
+  #
+  # This should be a hash where the key is the namevar of the resource and the value
+  # is a hash with all of the properties of the resource set
+  def read_all_instances
+    raise NotImplementedError, 'read_all_instances needs to be implemented by child providers'
   end
 
   # this method should check resource[:ensure]
@@ -110,6 +124,18 @@ class Puppet::Provider::Ipa < Puppet::Provider
   #  cached_instance[:xxx] to compare against (that's why it exists)
   def flush_instance
     raise NotImplementedError, 'flush_instance needs to be implemented by child providers'
+  end
+
+  # global cached instances, so we only have to read in the groups list once
+  def cached_all_instances
+    # return cache if it has been created, this means that this function will only need
+    # to be loaded once, returning all instances that exist of this resource in vsphere
+    # then, we can lookup our version by name/id/whatever. This saves a TON of processing
+    cached_instances = PuppetX::Encore::Ipa::Cache.instance.cached_instances[resource.type]
+    return cached_instances unless cached_instances.nil?
+
+    # read all instances from the API and save them in the cache
+    PuppetX::Encore::Ipa::Cache.instance.cached_instances[resource.type] = read_all_instances
   end
 
   def api_client
@@ -172,6 +198,37 @@ class Puppet::Provider::Ipa < Puppet::Provider
       JSON.parse(response.body)
     else
       response
+    end
+  end
+
+  def get_ldap_attribute(obj, attr)
+    return :absent if obj[attr].nil?
+    # special handling for arrays
+    if obj[attr].is_a?(Array)
+      return [] if obj[attr].empty?
+      # de-array-ify the thing if there is only one element
+      return obj[attr][0] if obj[attr].size == 1
+    end
+    # either return the full array if >1 element, or return the non-array value
+    obj[attr]
+  end
+
+  def get_ldap_attribute_boolean(obj, attr)
+    ldap_attr = get_ldap_attribute(obj, attr)
+    # FreeIPA is inconsistent
+    # sometimes values can be straight booleans
+    # sometimes they can be strings
+    case ldap_attr
+    when :absent
+      return nil
+    when true, false  # yes, this is how you do it in Ruby because there is no Boolean type
+      return ldap_attr
+    when String
+      # values can be: "TRUE", "True", or "true"
+      # casecmp does case insensitive comparison and returns 0 if equal
+      return ldap_attr.casecmp('true').zero?
+    else
+      raise Puppet::Error, "Unable to convert LDAP Attribute #{attr} from #{ldap_attr.class.name} to Boolean"
     end
   end
 end

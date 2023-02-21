@@ -25,6 +25,7 @@ class ipa::install::server::master (
   Optional[String]  $override_homedir     = $ipa::override_homedir,
   String            $sssd_debug_level     = $ipa::sssd_debug_level,
   Array[String]     $sssd_services        = $ipa::sssd_services,
+  Hash[String, Hash[String, Any]] $sssd_config_entries = $ipa::sssd_config_entries,
 ) {
 
   # Build server-install command
@@ -72,7 +73,7 @@ class ipa::install::server::master (
   }
 
   facter::fact { 'ipa_installed':
-    value => true,
+    value => 'true',
   }
 
   # Updated master sssd.conf file after IPA is installed.
@@ -92,6 +93,7 @@ class ipa::install::server::master (
       override_homedir     => $override_homedir,
       sssd_debug_level     => $sssd_debug_level,
       sssd_services        => $sssd_services,
+      config_entries       => $sssd_config_entries,
     }),
     mode    => '0600',
     require => Exec["server_install_${$facts['fqdn']}"],

@@ -83,7 +83,8 @@ describe Puppet::Type.type(:ipa_kinit) do
       expect(type_instance[:ensure]).to eq(:present)
     end
     it 'default to :present' do
-      expect(Puppet::Type.type(:ipa_kinit).new(name: name)[:ensure]).to eq(:present)
+      type = Puppet::Type.type(:ipa_kinit).new(name: name, password: 'Password123')
+      expect(type[:ensure]).to eq(:present)
     end
   end
 end

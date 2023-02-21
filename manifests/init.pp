@@ -171,6 +171,28 @@
 #
 #      (integer) The HTTPS port to use for the reverse proxy. Cannot be 443.
 #
+# @param [Hash[String, Hash[String, Any]]] sssd_config_entries
+#   Hash of extra configuration entries to include in the sssd config.
+#   The hash should be in the format of
+#   {
+#     'section' => {
+#       'key' => 'value',
+#      },
+#     'other_section' => {
+#       'key2' => 'value2',
+#     },
+#   }
+#   Example:
+#   {
+#     'domain/ipa.domain.tld' => {
+#       'krb5_renewable_lifetime' => '50d',
+#       'krb5_renew_interval' => 3600,
+#     },
+#     'sudo' => {
+#       'sudo_threshold' => 100,
+#     },
+#   }
+#
 class ipa (
   String               $admin_user               = 'admin',
   String               $admin_password           = '',
@@ -214,6 +236,7 @@ class ipa (
   String               $ipa_master_fqdn          = '',
   String               $ipa_role                 = 'client',
   String               $ipa_server_fqdn          = $facts['fqdn'],
+  String               $keytab_default           = $ipa::params::keytab_default,
   Boolean              $manage_host_entry        = true,
   Boolean              $manage                   = true,
   Boolean              $mkhomedir                = false,
@@ -228,6 +251,7 @@ class ipa (
   Boolean              $server_install_ldaputils = true,
   Array[String]        $sssd_services            = ['nss','sudo','pam','ssh','autofs'],
   Boolean              $trust_dns                = true,
+  Hash[String, Hash[String, Any]] $sssd_config_entries = {},
 ) inherits ipa::params {
 
   if $manage {

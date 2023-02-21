@@ -10,6 +10,7 @@ class ipa::params {
 
   $autofs_service = 'autofs'
   $sssd_service   = 'sssd'
+  $keytab_default = '/etc/krb5.keytab'
 
   $ds_ssl_min_version_tls12 = 'TLS1.2'
   $ds_ssl_ciphers_tls12 = [
@@ -155,6 +156,7 @@ class ipa::params {
   $ipa_server_package_name  = 'ipa-server'
   $kstart_package_name      = 'kstart'
   $sssd_package_name        = 'sssd-common'
+  $sssd_ipa_package_name    = 'sssd-ipa'
   $sssdtools_package_name   = 'sssd-tools'
 
   # In order to avoid this error:
@@ -164,7 +166,10 @@ class ipa::params {
   #   https://en.wikipedia.org/wiki/User_identifier#Reserved_ranges
   $uid_gid_min = 65536
   # allows for the fact to be empty/undef
-  $uid_gid_max = max(pick(dig($facts, 'ipa_login_defs', 'UID_MAX'), $uid_gid_min),
-                      pick(dig($facts, 'ipa_login_defs', 'GID_MAX'), $uid_gid_min))
+  $uid_gid_max = $facts['ipa_login_defs'] ? {
+    Hash    => max(pick($facts['ipa_login_defs']['UID_MAX'], $uid_gid_min),
+                    pick($facts['ipa_login_defs']['UID_MAX'], $uid_gid_min)),
+    default => $uid_gid_min,
+  }
   $idstart = (fqdn_rand('10737') + max($uid_gid_max, $uid_gid_min))
 }

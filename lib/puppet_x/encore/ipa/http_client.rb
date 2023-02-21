@@ -1,12 +1,8 @@
 require 'net/https'
 require 'ipaddr'
 require 'json'
-require 'puppet_x'
+require 'puppet_x/encore/ipa'
 require 'puppet'
-
-# Encore module
-module PuppetX::Encore
-end
 
 module PuppetX::Encore::Ipa
   # Client class for HTTP calls

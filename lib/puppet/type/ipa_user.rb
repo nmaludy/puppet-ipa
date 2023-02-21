@@ -1,3 +1,8 @@
+require 'puppet/property/boolean'
+require 'puppet_x/encore/ipa/boolean_property'
+require 'puppet_x/encore/ipa/list_property'
+require 'puppet_x/encore/ipa/type_utils'
+
 Puppet::Type.newtype(:ipa_user) do
   desc 'Manages a user in IPA'
 
@@ -18,9 +23,7 @@ Puppet::Type.newtype(:ipa_user) do
     desc 'Username of the user'
 
     validate do |value|
-      unless value.is_a?(String)
-        raise ArgumentError, "name is expected to be an String, given: #{value.class.name}"
-      end
+      PuppetX::Encore::Ipa::TypeUtils.validate_string(name, value)
     end
   end
 
@@ -32,10 +35,14 @@ Puppet::Type.newtype(:ipa_user) do
     sensitive true
 
     validate do |value|
-      unless value.is_a?(String)
-        raise ArgumentError, "initial_password is expected to be an String, given: #{value.class.name}"
-      end
+      PuppetX::Encore::Ipa::TypeUtils.validate_string(name, value)
     end
+  end
+
+  newproperty(:enable, boolean: true, parent: PuppetX::Encore::Ipa::BooleanProperty) do
+    desc 'Account is enabled or not'
+
+    defaultto :true  # yes, use a symbol here
   end
 
   newproperty(:first_name) do
@@ -46,9 +53,7 @@ Puppet::Type.newtype(:ipa_user) do
     end
 
     validate do |value|
-      unless value.is_a?(String)
-        raise ArgumentError, "first_name is expected to be an String, given: #{value.class.name}"
-      end
+      PuppetX::Encore::Ipa::TypeUtils.validate_string(name, value)
     end
   end
 
@@ -60,40 +65,45 @@ Puppet::Type.newtype(:ipa_user) do
     end
 
     validate do |value|
-      unless value.is_a?(String)
-        raise ArgumentError, "last_name is expected to be an String, given: #{value.class.name}"
-      end
+      PuppetX::Encore::Ipa::TypeUtils.validate_string(name, value)
     end
   end
 
-  newproperty(:sshpubkeys, array_matching: :all) do
+  newproperty(:sshpubkeys, array_matching: :all, parent: PuppetX::Encore::Ipa::ListProperty) do
     validate do |value|
       # note: Puppet automatically detects if the value is an array and calls this validate()
       #       on each item/value within the array
-      unless value.is_a?(String)
-        raise ArgumentError, "sshpubkeys are expected to be String, given: #{value.class.name}"
-      end
+      PuppetX::Encore::Ipa::TypeUtils.validate_string(name, value)
     end
 
-    # sort the array so we can compute the difference correct and order doesn't matter
-    def sort_array(a)
-      if a.nil?
-        []
-      else
-        a.sort
-      end
+    def membership
+      :sshpubkey_membership
     end
+  end
 
-    def should
-      sort_array(super)
+  newparam(:sshpubkey_membership) do
+    desc "Whether specified SSH public keys should be considered the **complete list**
+        (`inclusive`) or the **minimum list** (`minimum`) of roles the user
+        has."
+
+    newvalues(:inclusive, :minimum)
+
+    defaultto :minimum
+  end
+
+  newproperty(:homedirectory) do
+    desc 'Home directory for the user'
+
+    validate do |value|
+      PuppetX::Encore::Ipa::TypeUtils.validate_string(name, value)
     end
+  end
 
-    def should=(values)
-      super(sort_array(values))
-    end
+  newproperty(:login_shell) do
+    desc 'Login shell for the user'
 
-    def insync?(is)
-      sort_array(is) == should
+    validate do |value|
+      PuppetX::Encore::Ipa::TypeUtils.validate_string(name, value)
     end
   end
 
@@ -101,9 +111,15 @@ Puppet::Type.newtype(:ipa_user) do
     desc 'Email address of the user'
 
     validate do |value|
-      unless value.is_a?(String)
-        raise ArgumentError, "mail is expected to be an String, given: #{value.class.name}"
-      end
+      PuppetX::Encore::Ipa::TypeUtils.validate_string(name, value)
+    end
+  end
+
+  newproperty(:job_title) do
+    desc 'Job title of the user'
+
+    validate do |value|
+      PuppetX::Encore::Ipa::TypeUtils.validate_string(name, value)
     end
   end
 
@@ -111,9 +127,7 @@ Puppet::Type.newtype(:ipa_user) do
     desc 'Hash of additional IPA attributes to set on the user'
 
     validate do |value|
-      unless value.is_a?(Hash)
-        raise ArgumentError, "ldap_attributes is expected to be a Hash, given: #{value.class.name}"
-      end
+      PuppetX::Encore::Ipa::TypeUtils.validate_type(name, value, Hash)
     end
 
     munge do |value|
@@ -132,9 +146,7 @@ Puppet::Type.newtype(:ipa_user) do
     end
 
     validate do |value|
-      unless value.is_a?(String)
-        raise ArgumentError, "api_url is expected to be an String, given: #{value.class.name}"
-      end
+      PuppetX::Encore::Ipa::TypeUtils.validate_string(name, value)
     end
   end
 
@@ -144,9 +156,7 @@ Puppet::Type.newtype(:ipa_user) do
     isrequired
 
     validate do |value|
-      unless value.is_a?(String)
-        raise ArgumentError, "api_username is expected to be an String, given: #{value.class.name}"
-      end
+      PuppetX::Encore::Ipa::TypeUtils.validate_string(name, value)
     end
   end
 
@@ -158,9 +168,11 @@ Puppet::Type.newtype(:ipa_user) do
     sensitive true
 
     validate do |value|
-      unless value.is_a?(String)
-        raise ArgumentError, "api_password is expected to be an String, given: #{value.class.name}"
-      end
+      PuppetX::Encore::Ipa::TypeUtils.validate_string(name, value)
     end
+  end
+
+  validate do
+    PuppetX::Encore::Ipa::TypeUtils.validate_required_attributes(self)
   end
 end
