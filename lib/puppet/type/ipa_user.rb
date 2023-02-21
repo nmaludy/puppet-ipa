@@ -91,6 +91,14 @@ Puppet::Type.newtype(:ipa_user) do
     defaultto :minimum
   end
 
+  newproperty(:homedirectory) do
+    desc 'Home directory for the user'
+
+    validate do |value|
+      PuppetX::Encore::Ipa::TypeUtils.validate_string(name, value)
+    end
+  end
+
   newproperty(:login_shell) do
     desc 'Login shell for the user'
 

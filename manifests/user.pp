@@ -90,6 +90,7 @@ define ipa::user (
   Boolean $manage_home_dir            = true,
   String $home_dir_base               = '',
   String $home_dir_mode               = '0700',
+  String $home_dir                    = "${home_dir_base}/${name}",
   Boolean $manage_etc_skel            = true,
   Boolean $manage_dot_ssh             = true,
   Optional[Array[String]] $sshpubkeys = undef,
@@ -105,6 +106,7 @@ define ipa::user (
     first_name       => $first_name,
     last_name        => $last_name,
     sshpubkeys       => $sshpubkeys,
+    homedirectory    => $home_dir,
     login_shell      => $login_shell,
     mail             => $mail,
     job_title        => $job_title,
@@ -118,7 +120,6 @@ define ipa::user (
     default  => undef,
   }
   if $manage_home_dir {
-    $_home_dir = "${home_dir_base}/${name}"
     file { $_home_dir:
       ensure  => pick($_file_ensure, 'directory'),
       owner   => $name,

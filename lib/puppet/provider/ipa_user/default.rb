@@ -42,6 +42,7 @@ Puppet::Type.type(:ipa_user).provide(:default, parent: Puppet::Provider::Ipa) do
         last_name: get_ldap_attribute(user, 'sn'), # surname
       }
       instance[:sshpubkeys] = get_ldap_attribute(user, 'ipasshpubkey') if user['ipasshpubkey']
+      instance[:homedirectory] = get_ldap_attribute(user, 'homedirectory') if user['homedirectory']
       instance[:login_shell] = get_ldap_attribute(user, 'loginshell') if user['loginshell']
       instance[:mail] = get_ldap_attribute(user, 'mail') if user['mail']
       instance[:job_title] = get_ldap_attribute(user, 'title') if user['title']
@@ -129,6 +130,7 @@ Puppet::Type.type(:ipa_user).provide(:default, parent: Puppet::Provider::Ipa) do
       # yes, use a symbol here
       body['params'][1]['nsaccountlock'] = resource[:enable] == :false unless resource[:enable].nil?
       body['params'][1]['ipasshpubkey'] = resource[:sshpubkeys] if resource[:sshpubkeys]
+      body['params'][1]['homedirectory'] = resource[:homedirectory] if resource[:homedirectory]
       body['params'][1]['loginshell'] = resource[:login_shell] if resource[:login_shell]
       body['params'][1]['mail'] = resource[:mail] if resource[:mail]
       body['params'][1]['title'] = resource[:job_title] if resource[:job_title]
