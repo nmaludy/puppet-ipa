@@ -120,7 +120,7 @@ define ipa::user (
     default  => undef,
   }
   if $manage_home_dir {
-    file { $_home_dir:
+    file { $home_dir:
       ensure  => pick($_file_ensure, 'directory'),
       owner   => $name,
       group   => $name,
