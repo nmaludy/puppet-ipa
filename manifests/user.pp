@@ -133,7 +133,7 @@ define ipa::user (
   # copy all files in /etc/skel/. over to home directory
   if $manage_etc_skel {
     $facts['ipa_etc_skel_files'].each |$file_path, $file_props| {
-      file { "${_home_dir}/${file_props['local_path']}":
+      file { "${home_dir}/${file_props['local_path']}":
         ensure  => pick($_file_ensure, $file_props['ensure']),
         owner   => $name,
         group   => $name,
@@ -147,7 +147,7 @@ define ipa::user (
 
   # create user's ~/.ssh directory and set proper permissions
   if $manage_dot_ssh {
-    file { "${_home_dir}/.ssh":
+    file { "${home_dir}/.ssh":
       ensure  => pick($_file_ensure, 'directory'),
       owner   => $name,
       group   => $name,
