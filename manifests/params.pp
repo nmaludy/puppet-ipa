@@ -63,7 +63,7 @@ class ipa::params {
           $pki_ssl_ciphers        = $pki_ssl_ciphers_tls12
           $pki_ssl_protocol_range = $pki_ssl_protocol_range_tls12
         }
-        /(8)/: {
+        /(8)/, /(9)/: {
           $service_stop_epp    = 'systemctl stop <%= $service %>'
           $service_restart_epp = 'systemctl restart <%= $service %>'
 

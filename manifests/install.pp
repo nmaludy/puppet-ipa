@@ -40,7 +40,7 @@ class ipa::install (
     case $facts['os']['family'] {
       'RedHat': {
         case $facts['os']['release']['major'] {
-          /(7)/, /(8)/: {}
+          /(7)/, /(8)/, /(9)/: {}
           default: {
             fail("ERROR: Server can only be installed on RHEL 7+, \
             not RHEL version: ${facts['os']['full']}")
