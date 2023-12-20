@@ -252,6 +252,7 @@ class ipa (
   Array[String]        $sssd_services            = ['nss','sudo','pam','ssh','autofs'],
   Boolean              $trust_dns                = true,
   Hash[String, Hash[String, Any]] $sssd_config_entries = {},
+  Boolean $kinit_force                           = true,
 ) inherits ipa::params {
 
   if $manage {

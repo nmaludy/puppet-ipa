@@ -24,6 +24,7 @@ Puppet::Type.type(:ipa_kinit).provide(:default, parent: Puppet::Provider::Ipa) d
       output = klist('-l')
       Puppet.debug("klist got output: #{output}")
       output.lines.each do |line|
+        next if resource[:force]
         # compare downcase in case (for some reason) they change the text in a new version
         next if line.downcase.start_with?('principal name')
         next if line.start_with?('--------------')

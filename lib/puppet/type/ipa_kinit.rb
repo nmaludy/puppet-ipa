@@ -48,6 +48,12 @@ Puppet::Type.newtype(:ipa_kinit) do
     end
   end
 
+  newproperty(:force, boolean: true, parent: Puppet::Property::Boolean) do
+    desc 'Force kinit every time'
+
+    defaultto true
+  end
+
   validate do
     PuppetX::Encore::Ipa::TypeUtils.validate_required_attributes(self)
   end
