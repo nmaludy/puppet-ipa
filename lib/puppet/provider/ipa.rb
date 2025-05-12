@@ -164,6 +164,7 @@ class Puppet::Provider::Ipa < Puppet::Provider
                 client: api_client)
     # https://access.redhat.com/articles/2728021#end-point-pwd
     headers = {
+      'Referer' => api_make_url(''),
       'Content-Type' => 'application/x-www-form-urlencoded',
       'Accept' => 'text/plain',
     }

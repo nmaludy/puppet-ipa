@@ -60,6 +60,7 @@ module PuppetX::Encore::Ipa
       elsif form
         enctype = headers['Content-Type'] || headers['content-type'] || 'application/x-www-form-urlencoded'
         req.set_form(form, enctype)
+        Puppet.debug("http_client - execute - form = #{form}  enctype=#{enctype}")
         Puppet.debug("http_client - execute - setting form data - body = #{req.body}")
       end
 
