@@ -255,3 +255,4 @@ huit/puppet-ipa - Puppet module that can manage an IPA master, replicas and clie
     
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
